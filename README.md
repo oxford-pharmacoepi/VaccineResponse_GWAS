@@ -1,1 +1,1 @@
-# ImmunicityBreakthrough_GWAS
+# VaccineResponse_GWAS
