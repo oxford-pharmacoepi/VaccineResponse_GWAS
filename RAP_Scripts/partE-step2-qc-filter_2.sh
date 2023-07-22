@@ -17,7 +17,7 @@ for i in {3..17}; do
      -iin="${imputed_file_dir}/ukb22828_c${i}_b0_v3.fam"\
      -iin="/${directory}/${phenotype}.phe" \
      -icmd="${run_plink_wes}" --tag="Step2" --instance-type "mem1_ssd1_v2_x36"\
-     --name "QC_chr${i}_${phenotype}"\
+     --name "StepE_chr${i}_${phenotype}"\
      --destination="${project}:/${directory}/" --brief --yes
 done
 
