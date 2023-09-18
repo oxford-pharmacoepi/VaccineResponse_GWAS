@@ -1,0 +1,54 @@
+rm(list = ls())
+pacman::p_load('here','readr','qqman','dplyr','RColorBrewer','ggplot2','gridGraphics','grid','ggplot2','gridExtra','tidyverse','egg')
+
+dir <- c('oneDose','twoDose','severityCovid','susceptibilityCovid',
+         'susceptibilityOmicron','susceptibilityPreOmicron')
+ylim_MH <- c(30,14,13,40,50,18)
+ylim_QQ <- c(14,14,12,14,14,12)
+
+y_QQ_min <- c(16, 8, 8,27,32,10)
+y_QQ_max <- c(30,14,13,40,50,18)
+for (ii in 1:length(dir)){
+  gwas <- read_delim(here('GWAS','ImputedData','Results',paste0(dir[ii],'.txt'))) %>%
+    mutate(P = 10^(-LOG10P))  %>%
+    select(CHR = CHROM, BP = GENPOS, SNP = ID, LOG10P, P) %>%
+    filter(!is.na(LOG10P))
+  
+  source(here("R_Scripts","getManhattanPlot.R"))
+  plot1 <- getManhattanPlot(gwas,y_lim = ylim_MH[ii])
+  source(here("R_Scripts","getQQPlot.R"))
+  plot2 <- getQQPlot(gwas, x_lim = 6.5, y_lim = ylim_QQ[ii])
+  
+  gwas_top <- gwas %>% filter(LOG10P > 1)
+  gwas_low <- gwas %>% filter(LOG10P <= 1) %>% sample_frac(0.01)
+  gwas1 <- gwas_top %>% full_join(gwas_low) 
+  
+  axisdf <- gwas1 %>%
+    # Compute chromosome size
+    group_by(CHR) %>%
+    summarise(chr_len = max(BP)) %>%
+    # Calculate cumulative position of each chromosome
+    mutate(tot = cumsum(chr_len)-chr_len) %>%
+    select(-chr_len) %>%
+    # Add this info to the initial dataset
+    left_join(gwas1, ., by = c("CHR" ="CHR")) %>%
+    # Add the cumulative position of each SNP
+    arrange(CHR, BP) %>%
+    mutate(BPcum = BP+tot) %>%
+    group_by(CHR) %>%
+    summarize(center=(max(BPcum) + min(BPcum) ) / 2 )
+  
+  # Merge both plots -------------------------------------------------------------
+  if (ii == 3){
+    p <- plot1 + annotation_custom(ggplotGrob(plot2),
+                                   ymin = y_QQ_min[ii], ymax = y_QQ_max[ii],
+                                   xmin = axisdf$center[axisdf$CHR == 1],
+                                   xmax = axisdf$center[axisdf$CHR == 6])
+  }else{
+    p <- plot1 + annotation_custom(ggplotGrob(plot2),
+                                   ymin = y_QQ_min[ii], ymax = y_QQ_max[ii],
+                                   xmin = axisdf$center[axisdf$CHR == 10],
+                                   xmax = axisdf$center[axisdf$CHR == 22])
+  }
+  ggsave(paste0(dir_results,"Figures",paste0('MH2_',dir[ii],'.png')), plot = p, width = 240, height = 140, dpi = 300, units = 'mm')
+}
