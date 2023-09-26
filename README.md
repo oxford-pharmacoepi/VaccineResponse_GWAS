@@ -30,6 +30,7 @@ Previously, you must ensure that you have a directory "${folder directory}" with
  - ukb669864_covariates.csv [CSV file]: File with covariates information. Columns required include
 
         -> Sex: Field 31 from UK Biobank
+        -> BMI: Field 21001.0.0 from UK Biobank
         -> PC1,...,PC10: Field 22009 from UK Biobank
         -> Year_of_birth: Field 34 from UK Biobank
         -> Genetic batch: Field 22000 from UK Biobank
