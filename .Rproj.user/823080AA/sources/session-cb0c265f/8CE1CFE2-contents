@@ -1,0 +1,54 @@
+# ============================================================================ #
+#                               GET TABLE ONE                                  #
+#                            Marta Alcalde Herraiz                             #
+# ============================================================================ #
+
+getTableOne <- function(tab, outcome){
+  to <- CreateTableOne(vars = colnames(tab)[3:length(colnames(tab))], 
+                       data = tab,
+                       strata = outcome,
+                       test = FALSE,
+                       smd = TRUE) %>%
+    print(smd = TRUE, showAllLevels = TRUE)
+  
+  # Missing rate
+  controls <- paste0( tab %>% 
+                        rename('outcome' = outcome) %>%
+                        filter(outcome == 0) %>%
+                        apply(2,function(x) {sum(is.na(x))}),
+                      ' (',
+                      round(tab %>%
+                              rename('outcome' = outcome) %>%
+                              filter(outcome == 0) %>%
+                              apply(2,function(x) {sum(is.na(x)) / length(x) * 100}),
+                            2),
+                      ')')
+  
+  cases <- paste0(tab %>% 
+                    rename('outcome' = outcome) %>%
+                    filter(outcome == 1) %>%
+                    apply(2,function(x) {sum(is.na(x))}),
+                  ' (',
+                  round(tab %>%
+                          rename('outcome' = outcome) %>%
+                          filter(outcome == 1) %>%
+                          apply(2,function(x) {sum(is.na(x)) / length(x) * 100}),
+                        2),
+                  ')')
+  
+  t1 <- as_tibble(to) %>% 
+    mutate(rownames = rownames(to), 
+           "00" = as.character(controls), 
+           "11" = as.character(cases)) %>% 
+    relocate("rownames") %>% 
+    pivot_longer(c("0", "1", "00", "11")) %>% 
+    mutate(rownames = if_else(name %in% c("00", "11"), paste0("Missings (%)"), rownames), 
+           name = if_else(name == "00", "0", name)) %>% 
+    mutate(name = if_else(name == "11", "1", name)) %>%
+    pivot_wider() %>%
+    relocate("Controls" = '0', .after = level) %>%
+    relocate("Cases" = "1", .after = Controls) %>%
+    mutate(SMD = if_else(rownames == "Missings (%)"," ",SMD))
+  
+  return(t1)
+}

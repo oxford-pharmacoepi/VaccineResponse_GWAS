@@ -1,0 +1,2 @@
+MergeTables <- function(ukb_data,hes_data,gp_data){
+  

@@ -4,8 +4,8 @@
 # ============================================================================ #
 rm(list = ls())
 pacman::p_load('dplyr','tibble','readr','here',
-               'lubridate','pbatR','forcats',
-               'qqman','RColorBrewer','ggplot2','gridGraphics',
+               'lubridate','pbatR','forcats','tableone',
+               'qqman','RColorBrewer','ggplot2','gridGraphics','xlsx',
                'grid','gridExtra','tidyverse','egg','flextable','ftExtra','officer')
 
 # Directory where the data is
@@ -34,10 +34,27 @@ dir.create(paste0(dir_results,'Tables'))
 source(here('R_Scripts','CreateTable.R'))
 source(here('R_Scripts','CreateTable_Validation.R'))
 
+
+# hes  <- as_tibble(read.delim(paste0(dir_data,'hesin_diag.txt'), sep = "\t", quote = ""))
+# hesD <- as_tibble(read.delim(paste0(dir_data,'hesin.txt'), sep = "\t", quote = ""))
+# gp   <- as_tibble(read.delim(paste0(dir_data,'gp_clinical.txt'), sep = "\t", quote = ""))
+# ukb <- as_tibble(read.delim(paste0(dir_data,'ukb669864_logistic.csv'), sep = "\t", quote = ""))
+hes  <- as_tibble(read.delim('C:/Users/martaa/Desktop/Projects/MR_Sclerostin/MR_Sclerostin_Data/UKB_old/hesin_diag.txt',sep = "\t", quote = ""))
+hesD <- as_tibble(read.delim('C:/Users/martaa/Desktop/Projects/MR_Sclerostin/MR_Sclerostin_Data/UKB_old/hesin.txt', sep = "\t", quote = ""))
+gp   <- as_tibble(read.delim('C:/Users/martaa/Desktop/Projects/MR_Sclerostin/MR_Sclerostin_Data/UKB_old/gp_clinical.txt',sep = "\t", quote = ""))
+gp <- gp %>% filter(event_dt != "01/01/1900",
+                    event_dt != "01/01/1901",
+                    event_dt != "02/02/1902",
+                    event_dt != "03/03/1903",
+                    event_dt != "07/07/2037")
+ukb  <- as_tibble(read.csv('C:/Users/martaa/Desktop/Projects/MR_Sclerostin/MR_Sclerostin_Data/UKB_old/ukb669864_logistic.csv'))
+
+
 # SCRIPTS TO MAKE THE FIGURES FROM THE PAPER -----------------------------------
 dir.create(paste0(dir_results,'Figures'))
 source(here('R_Scripts','Figure.R'))
 source(here('R_Scripts','CreateFigure_Validation.R'))
+
 
 
 

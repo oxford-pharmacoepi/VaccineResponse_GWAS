@@ -1,0 +1,22 @@
+# ============================================================================ #
+#                                Phenotyping GP                                #
+#                            Marta Alcalde Herraiz                             #
+# ============================================================================ #
+PhenotypingGP <- function(outc,gp,pop){
+  phen <- read.xlsx(here("R_Scripts","PhenotypingR.xlsx"), sheetName = outc)
+  
+  gp_codes <- phen %>% select("GP") %>%
+    filter(!is.na(GP))
+  
+  pop1 <- gp %>% select(eid) %>% filter(eid %in% pop$eid) %>% distinct()
+  
+  g <- gp %>% filter(read_2 %in% gp_codes$GP | read_3 %in% gp_codes$GP) %>% 
+    select(eid) %>% 
+    distinct() %>%
+    mutate(state_gp = 1) %>%
+    right_join(pop1, 
+               by = "eid") %>%
+    mutate(state_gp = if_else(is.na(state_gp),0,state_gp))
+  
+  return(g)
+}

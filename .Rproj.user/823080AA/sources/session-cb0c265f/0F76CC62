@@ -1,26 +1,26 @@
 {
-    "id": "74E2C26C",
-    "path": "~/GitHub/VaccineResponse_GWAS/R_Scripts/Figure.R",
-    "project_path": "R_Scripts/Figure.R",
+    "id": "0F76CC62",
+    "path": "~/GitHub/VaccineResponse_GWAS/R_Scripts/CreateTable.R",
+    "project_path": "R_Scripts/CreateTable.R",
     "type": "r_source",
     "hash": "0",
     "contents": "",
     "dirty": false,
-    "created": 1695057683852.0,
+    "created": 1695486722071.0,
     "source_on_save": false,
-    "relative_order": 2,
+    "relative_order": 4,
     "properties": {
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "141,0",
-        "scrollLine": "101"
+        "cursorPosition": "4,0",
+        "scrollLine": "0"
     },
     "folds": "",
-    "lastKnownWriteTime": 1695057828,
+    "lastKnownWriteTime": 1695055934,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1695057828234,
+    "last_content_update": 1695055934,
     "read_only": false,
     "read_only_alternatives": []
 }
