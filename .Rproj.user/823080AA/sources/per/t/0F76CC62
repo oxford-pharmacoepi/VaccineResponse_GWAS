@@ -3,7 +3,7 @@
     "path": "~/GitHub/VaccineResponse_GWAS/R_Scripts/CreateTable.R",
     "project_path": "R_Scripts/CreateTable.R",
     "type": "r_source",
-    "hash": "0",
+    "hash": "4277536569",
     "contents": "",
     "dirty": false,
     "created": 1695486722071.0,
@@ -12,15 +12,15 @@
     "properties": {
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "4,0",
-        "scrollLine": "0"
+        "cursorPosition": "38,12",
+        "scrollLine": "33"
     },
     "folds": "",
-    "lastKnownWriteTime": 1695055934,
+    "lastKnownWriteTime": 1695835681,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1695055934,
+    "last_content_update": 1695835681105,
     "read_only": false,
     "read_only_alternatives": []
 }

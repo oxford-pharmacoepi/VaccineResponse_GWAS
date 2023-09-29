@@ -35,10 +35,10 @@ gwas_sever <-  read_delim(paste0(dir_results,'GWAS/breakthrough_ImputedData_covi
          'Breakthrough_Severity_Beta' = BETA,
          'Breakthrough_Severity_P Value' = P)
 
-mapping <- read_table(paste0(dir_results,'Mapping/snps_1.txt')) %>% select(rsID,nearestGene) %>%
-  full_join(read_table(paste0(dir_results,'Mapping/snps_2.txt'))) %>% select(rsID,nearestGene) %>%
-  full_join(read_table(paste0(dir_results,'Mapping/snps_3.txt')))  %>% select(rsID,nearestGene)%>%
-  full_join(read_table(paste0(dir_results,'Mapping/snps_4.txt')))  %>% select(rsID,nearestGene)
+mapping <- read_table(paste0(dir_results,'Mapping/snps_1.txt')) %>% select(rsID,nearestGene,func) %>%
+  full_join(read_table(paste0(dir_results,'Mapping/snps_2.txt'))) %>% select(rsID,nearestGene,func) %>%
+  full_join(read_table(paste0(dir_results,'Mapping/snps_3.txt')))  %>% select(rsID,nearestGene,func)%>%
+  full_join(read_table(paste0(dir_results,'Mapping/snps_4.txt')))  %>% select(rsID,nearestGene,func)
 
 gwas <- gwas_onedose %>%
   inner_join(gwas_twodose) %>% inner_join(gwas_suscep) %>% inner_join(gwas_sever) %>%
@@ -60,26 +60,27 @@ gwas <- gwas_onedose %>%
          `Breakthrough_Severity_EAF` = round(`Breakthrough_Severity_EAF`, digits = 2),
          `Breakthrough_Severity_Beta` = round(`Breakthrough_Severity_Beta`, digits = 2),
          `Breakthrough_Severity_P Value` = formatC(`Breakthrough_Severity_P Value`, format = "e", digits = 1)) %>%
-  select(-BP) %>%
-  rename("EA" = ALLELE1, 'Nearest gene' = nearestGene) %>%
+  rename("EA" = ALLELE1, 'Nearest gene' = nearestGene, 'Function' = func) %>%
   mutate("SNP" = if_else(SNP == "6:32419074_CT_C","rs2150392827",SNP)) %>%
   relocate(CHR) %>%
   relocate('Nearest gene', .after = SNP) %>%
+  relocate('Function', .before = 'Nearest gene') %>%
+  relocate('BP', .after = 'CHR') %>%
   flextable() %>%
   span_header(sep = "_",) %>%
   align(i = 1, align = 'center', part = "header") %>%
   align(i = 2, align = 'center', part = "header") %>%
   align(i = 3, align = 'center', part = "header") %>%
   align(align = "center",part = "all") %>%
-  vline(i = 1, j = c(4:8), part = "header") %>%
-  vline(i = 2, j = seq(4,12,1), part = "header") %>%
-  vline(i = 3, j = seq(4,15,3), part = "header") %>%
-  vline(j = seq(4,15,3), part = "body") %>%
+  vline(i = 1, j = c(6:18), part = "header") %>%
+  vline(i = 2, j = seq(6,18,1), part = "header") %>%
+  vline(i = 3, j = seq(6,18,3), part = "header") %>%
+  vline(j = seq(6,18,3), part = "body") %>%
   bg(j = "Immune response_One dose_EAF", bg = "#EFEFEF", part = "all") %>%
   bg(j = "Immune response_One dose_P Value", bg = "#EFEFEF", part = "all") %>%
   bg(j = "Immune response_Two dose_Beta", bg = "#EFEFEF", part = "body") %>%
-  bg(i = 3, j = c(9,11,13,15), bg = "#EFEFEF", part = "header") %>%
-  bg(i = 2, j = c(11,13), bg = "#EFEFEF", part = "header") %>%
+  bg(i = 3, j = c(11,13,15,17), bg = "#EFEFEF", part = "header") %>%
+  bg(i = 2, j = c(13), bg = "#EFEFEF", part = "header")%>%
   bg(j = "Breakthrough_Susceptibility_EAF", bg = "#EFEFEF", part = "body") %>%
   bg(j = "Breakthrough_Susceptibility_P Value",bg = "#EFEFEF", part = "body") %>%
   bg(j = "Breakthrough_Severity_Beta",bg = "#EFEFEF", part = "body") %>%
