@@ -1,0 +1,106 @@
+# ============================================================================ #
+#                                CodeToRun                                     #
+#                       2023 - Marta Alcalde-Herraiz                           #
+# ============================================================================ #
+rm(list=ls())
+
+# R Version: 4.2.3
+# if (!require("BiocManager", quietly = TRUE))
+#   install.packages("BiocManager")
+# BiocManager::install("trio")
+# install.packages("remotes")
+# remotes::install_github("MRCIEU/TwoSampleMR")
+library('TwoSampleMR')
+library('trio')
+
+pacman::p_load('here','tibble','dplyr','readr','tidyverse','MendelianRandomization',
+               'LDlinkR','xlsx','survival','coloc','ggplot2','readxl','tableone',
+               'lubridate')
+
+
+# Specify the following variables
+pathData <- "C:/Users/martaa/Desktop/Projects/MR_Sclerostin_Data/" # Path to the Data directory
+pathUKB  <- "C:/Users/martaa/Desktop/Projects/UKBiobank_98358/" # Path to the shortcut directory
+source(here('Metaanalysis','preprocessing.R'))
+
+# Instructions to use GWAMA:                                                   
+#  1. First install gwama (can be found on this directory).                    
+#  2. Create a .in file with the following lines:                              
+#       sc.txt                                                                 
+#       nn.txt                                                                 
+#       ng.txt                                                                 
+#     It will be read by GWAMA software to know which files it has to read.    
+#  3. Open command prompt in this directory                                    
+# Fixed effect method:                                                         
+#  4. Write in the command line the following:                                 
+# gwama -o Fixed_results/Fixed -qt
+# Random effect method:                                                        
+#  5. Write in the command line the following:                                 
+# gwama -o Random_results/Random -qt -r                                       
+# Instructions to use METAL                                                    
+#  6. Click on metal.exe to open the command window.                           
+#  7. Write the following instructions:                                        
+#     SCHEME STDERR                                                            
+#     MARKER MARKERNAME                                                        
+#     ALLELELABELS EA NEA                                                      
+#     PVALUELABEL pval                                                         
+#     FREQLABEL EAF                                                            
+#     AVERAGEFREQ ON                                                           
+#     WEIGHTLABEL N                                                            
+#     STDERRLABEL SE                                                           
+#     EFFECTLABEL BETA                                                         
+#     PROCESS sc.txt                                                           
+#     PROCESS nn.txt                                                           
+#     PROCESS ng.txt                                                           
+#     ANALYZE                                                                  
+#    The file: METAANALYSIS1.TBL.info will contain the results                 
+
+source(here('Metaanalysis','processing.R'))
+source(here('Pruning','pruning.R'))
+source(here('MR_gwas','MR.R'))
+ukb <- as_tibble(read_delim(paste0(pathUKB,"ukb673925.tab"))) %>%
+  rename("eid" = "f.eid")
+source(here('MR_UKBiobank','genetics.R'))
+source(here('MR_UKBiobank','cohort.R'))
+source(here('MR_UKBiobank','ContinuousData','MR.R'))
+
+hes  <- as_tibble(read.delim(paste0(pathUKB,"hesin_diag.txt"),sep = "\t", quote = ""))
+hesD <- as_tibble(read.delim(paste0(pathUKB,"hesin.txt"), sep = "\t", quote = "")) %>% 
+  mutate(epistart = as.Date(epistart,'%d/%m/%Y')) %>%
+  mutate(epiend   = as.Date(epiend, '%d/%m/%Y')) %>%
+  mutate(year     = year(epistart)) %>%
+  filter(year <= 2019)
+gp <- as_tibble(read.delim(paste0(pathUKB,"gp_clinical.txt"),sep = "\t", quote = "")) 
+gp <- gp %>% 
+  filter(event_dt != "01/01/1900",
+         event_dt != "01/01/1901",
+         event_dt != "02/02/1902",
+         event_dt != "03/03/1903",
+         event_dt != "07/07/2037") %>%
+  mutate(event_dt = as.Date(event_dt, format = '%d/%m/%Y')) %>%
+  mutate(year     = year(event_dt)) %>%
+  filter(year <= 2019)
+
+source(here('MR_UKBiobank','BinaryData','Logistic','Phenotyping.R'))
+source(here('MR_UKBiobank','BinaryData','SA_Birth','Phenotyping.R')) 
+source(here('MR_UKBiobank','BinaryData','SA_Enrolment','Phenotyping.R'))
+source(here('MR_UKBiobank','BinaryData','MR_LR.R'))
+source(here('MR_UKBiobank','BinaryData','MR_SA.R'))
+source(here('MR_UKBiobank','BinaryData','SA_Enrolment','MR_SA.R'))
+
+# COLOCALIZATION ---------------------------------------------------------------
+source(here('Colocalization','colocalization.R'))
+
+# SENSITIVITY ANALYSIS ---------------------------------------------------------
+# Single SNP
+source(here('SensitivityAnalysis','SingleSNP','exposure_data.R'))
+source(here('SensitivityAnalysis','SingleSNP','SingleSNP_gwas.R'))
+source(here('SensitivityAnalysis','SingleSNP','SingleSNP_continuous.R'))
+source(here('SensitivityAnalysis','SingleSNP','SingleSNP_BinaryLR.R'))
+source(here('SensitivityAnalysis','SingleSNP','SingleSNP_BinarySA.R'))
+
+# Results
+source(here('Tables','UntitledR.R'))
+p <- here('Figures','AllFigures.m')
+system(paste0("matlab -nodisplay -r \"run('",p,"'); exit\""))
+

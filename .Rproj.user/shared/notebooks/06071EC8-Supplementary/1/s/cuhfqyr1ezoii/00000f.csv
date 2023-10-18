@@ -1,0 +1,8 @@
+"0","cat(""\n\n\\pagebreak\n"")"
+"1","
+
+\pagebreak
+"
+"0","cat(paste0(""**Figure "",num_fig,"". **"",""Flow chart of antibody positivity""))"
+"1","**Figure 1. **Flow chart of antibody positivity"
+"0","num_fig <- num_fig + 1"

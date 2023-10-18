@@ -14,7 +14,7 @@ tableOnes <- list()
 
 for (i in 1:4){
   pop <- tableList[[i]] %>% select(eid)
-  outc <- c('CAD','MI','IS','Hypertension','T2DM')
+  outc <- c('CAD','MI','IS','Hypertension','T2DM')  
   for (j in outc){
     source(here('R_Scripts','PhenotypingHES.R'))
     hes_data <- PhenotypingHes(j,hes,pop)

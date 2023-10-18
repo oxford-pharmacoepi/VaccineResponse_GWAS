@@ -1,0 +1,32 @@
+{
+    "id": "0A32427E",
+    "path": "~/GitHub/VaccineResponse_GWAS/R_Scripts/TablesAndFigures.qmd",
+    "project_path": "R_Scripts/TablesAndFigures.qmd",
+    "type": "quarto_markdown",
+    "hash": "0",
+    "contents": "",
+    "dirty": true,
+    "created": 1697623260689.0,
+    "source_on_save": false,
+    "relative_order": 5,
+    "properties": {
+        "rmdVisualMode": "false",
+        "rmdVisualWrapConfigured": "true",
+        "tempName": "Untitled1",
+        "source_window_id": "",
+        "Source": "Source",
+        "docOutlineVisible": "1",
+        "rmdVisualCollapsedChunks": "",
+        "cursorPosition": "8,9",
+        "scrollLine": "0",
+        "rmdVisualModeLocation": "904:0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1697626259,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1697626321268,
+    "read_only": false,
+    "read_only_alternatives": []
+}

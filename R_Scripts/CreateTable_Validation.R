@@ -107,6 +107,7 @@ gwas1 <- gwas %>%
   flextable() %>%
   span_header(sep = "_",) %>%
   align(align = "center",part = "all")
+
 save_as_docx(gwas1, path=paste0(dir_results,"/Validation/Table_Validation.docx"), align = "center")
 
 
