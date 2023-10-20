@@ -3,7 +3,27 @@ if(!require("remotes"))
   install.packages("remotes") # if necessary
 library(remotes)
 install_github("chr1swallace/coloc@main",build_vignettes=TRUE)
+
+rm(list = ls())
+pacman::p_load('dplyr','tibble','readr','here',
+               'lubridate','pbatR','forcats','tableone',
+               'qqman','RColorBrewer','ggplot2','gridGraphics','xlsx','stringr',
+               'grid','gridExtra','tidyverse','egg','flextable','ftExtra','officer')
 library(coloc)
+# Directory where the data is
+dir_data <- 'C:/Users/martaa/Desktop/Projects/VaccineResponse_GWAS/'
+dir_ukb  <- 'C:/Users/martaa/Desktop/Projects/UKBiobank_65397/'
+dir_results <- paste0(dir_data,'Results/')
+
+ch  <- c('oneDose', 
+         'twoDose',
+         'breakthroughSusceptibility',
+         'breakthroughSeverity')
+nam <- c('Immune response - One dose',
+         'Immune response - Two dose',
+         'Breakthrough susceptibility',
+         'Breakthrough severity')
+
 
 genRiskList <- list()
 gwasList    <- list()
@@ -11,372 +31,194 @@ for(i in 1:4){
   genRiskList[[i]] <- read_delim(paste0(dir_results,'FUMA/',ch[i],'/GenomicRiskLoci.txt')) %>%
     select(rsID, chr, pos, p) %>%
     arrange(p)
+  if(i == 1){
+    genrisk <- genRiskList[[i]] %>% select(rsID,chr,pos)
+  }else{
+    genrisk <- genrisk %>% union_all(genRiskList[[i]] %>% select(rsID,chr,pos))
+  }
   gwasList[[i]] <- read_delim(paste0(dir_results,'GWAS/imputedData_',ch[i],'.txt'))
 }
 
-# Genomic risk loci - Immune response  One dose ================================
 w <- 250e3
-tableList_coloc_OD <- tibble(
-  `Immune response - One dose genetic loci_SNP` = NA,
-  `Immune response - One dose genetic loci_CHR` = NA,
-  `Immune response - One dose genetic loci_POS` = NA,
-  `Immune response - One dose genetic loci_Immune response - Two dose_N` = NA,
-  `Immune response - One dose genetic loci_Immune response - Two dose_H4 Prob (%)` = NA,
-  `Immune response - One dose genetic loci_Breakthrough susceptibility_N` = NA,
-  `Immune response - One dose genetic loci_Breakthrough susceptibility_H4 Prob (%)` = NA,
-  `Immune response - One dose genetic loci_Breakthrough severity_N` = NA,
-  `Immune response - One dose genetic loci_Breakthrough severity_H4 Prob (%)` = NA
-)
 
-for (i in 1:nrow(genRiskList[[1]])){
-  gwas1_1 <- gwasList[[1]] %>% 
-    filter(GENPOS >= genrisk$pos[i]-w-1& GENPOS <= genrisk$pos[i]+w+1)
-  
-  gwas2_1 <- gwasList[[2]] %>%
-    filter(GENPOS >= genrisk$pos[i]-w-1 & GENPOS <= genrisk$pos[i]+w+1)
-  
-  gwas3_1 <- gwasList[[3]] %>%
-    filter(GENPOS >= genrisk$pos[i]-w-1 & GENPOS <= genrisk$pos[i]+w+1)
-  
-  gwas4_1 <- gwasList[[4]] %>%
-    filter(GENPOS >= genrisk$pos[i]-w-1 & GENPOS <= genrisk$pos[i]+w+1)
-  
-  d1 <- list(
-    beta = gwas1_1$BETA,
-    varbeta = gwas1_1$SE^2,
+getColocFormat <- function(gwas,genrisk,i,w){
+  gwas1 <- gwas %>%
+    filter(GENPOS >= genrisk$pos[i]-w-1 & GENPOS <= genrisk$pos[i]+w+1 & CHROM == genrisk$chr[i])
+
+  d <- list(
+    beta = gwas1$BETA,
+    varbeta = gwas1$SE^2,
     type = 'cc',
-    snp  = gwas1_1$ID,
-    position = gwas1_1$GENPOS
+    snp  = gwas1$ID,
+    position = gwas1$GENPOS
   )
-  
-  d2 <- list(
-    beta = gwas2_1$BETA,
-    varbeta = gwas2_1$SE^2,
-    type = 'cc',
-    snp  = gwas2_1$ID,
-    position = gwas2_1$GENPOS
-  )
-  
-  d3 <- list(
-    beta = gwas3_1$BETA,
-    varbeta = gwas3_1$SE^2,
-    type = 'cc',
-    snp  = gwas3_1$ID,
-    position = gwas3_1$GENPOS
-  )
-  
-  d4 <- list(
-    beta = gwas4_1$BETA,
-    varbeta = gwas4_1$SE^2,
-    type = 'cc',
-    snp  = gwas4_1$ID,
-    position = gwas4_1$GENPOS
-  )
-  
-  c12 <- coloc.abf(dataset1 = d1, dataset2 = d2, p1 = 1e-4, p2 = 1e-4, p12 = 1e-5)
-  c13 <- coloc.abf(dataset1 = d1, dataset2 = d3, p1 = 1e-4, p2 = 1e-4, p12 = 1e-5)
-  c14 <- coloc.abf(dataset1 = d1, dataset2 = d4, p1 = 1e-4, p2 = 1e-4, p12 = 1e-5)
-  
-  tableList_coloc_OD <- tableList_coloc_OD %>% add_row(tibble(
-    `Immune response - One dose genetic loci_SNP` = genRiskList[[1]]$rsID[[i]],
-    `Immune response - One dose genetic loci_CHR` = genRiskList[[1]]$chr[[i]],
-    `Immune response - One dose genetic loci_POS` = genRiskList[[1]]$pos[[i]],
-    `Immune response - One dose genetic loci_Immune response - Two dose_N` = c12$summary[[1]],
-    `Immune response - One dose genetic loci_Immune response - Two dose_H4 Prob (%)` = round(c12$summary[[6]]*100, digits = 2),
-    `Immune response - One dose genetic loci_Breakthrough susceptibility_N` = c13$summary[[1]],
-    `Immune response - One dose genetic loci_Breakthrough susceptibility_H4 Prob (%)` = round(c13$summary[[6]]*100, digits = 2),
-    `Immune response - One dose genetic loci_Breakthrough severity_N` = c14$summary[[1]],
-    `Immune response - One dose genetic loci_Breakthrough severity_H4 Prob (%)` = round(c14$summary[[6]]*100, digits = 2)
-  ))
+
+  return(d)
 }
 
-# Genomic risk loci - Immune response  Two dose ================================
-w <- 250e3
-tableList_coloc_TD <- tibble(
-  `Immune response - Two dose genetic loci_SNP` = NA,
-  `Immune response - Two dose genetic loci_CHR` = NA,
-  `Immune response - Two dose genetic loci_POS` = NA,
-  `Immune response - Two dose genetic loci_Immune response - One dose_N` = NA,
-  `Immune response - Two dose genetic loci_Immune response - One dose_H4 Prob (%)` = NA,
-  `Immune response - Two dose genetic loci_Breakthrough susceptibility_N` = NA,
-  `Immune response - Two dose genetic loci_Breakthrough susceptibility_H4 Prob (%)` = NA,
-  `Immune response - Two dose genetic loci_Breakthrough severity_N` = NA,
-  `Immune response - Two dose genetic loci_Breakthrough severity_H4 Prob (%)` = NA
-)
+n <- matrix(0,nrow(genrisk),4)
+c <- matrix(0,nrow(genrisk),4)
+for(i in 1:nrow(genrisk)){
 
-for (i in 1:nrow(genRiskList[[2]])){
-  gwas1_1 <- gwasList[[1]] %>% 
-    filter(GENPOS >= genrisk$pos[i]-w-1& GENPOS <= genrisk$pos[i]+w+1)
-  
-  gwas2_1 <- gwasList[[2]] %>%
-    filter(GENPOS >= genrisk$pos[i]-w-1 & GENPOS <= genrisk$pos[i]+w+1)
-  
-  gwas3_1 <- gwasList[[3]] %>%
-    filter(GENPOS >= genrisk$pos[i]-w-1 & GENPOS <= genrisk$pos[i]+w+1)
-  
-  gwas4_1 <- gwasList[[4]] %>%
-    filter(GENPOS >= genrisk$pos[i]-w-1 & GENPOS <= genrisk$pos[i]+w+1)
-  
-  d1 <- list(
-    beta = gwas1_1$BETA,
-    varbeta = gwas1_1$SE^2,
-    type = 'cc',
-    snp  = gwas1_1$ID,
-    position = gwas1_1$GENPOS
-  )
-  
-  d2 <- list(
-    beta = gwas2_1$BETA,
-    varbeta = gwas2_1$SE^2,
-    type = 'cc',
-    snp  = gwas2_1$ID,
-    position = gwas2_1$GENPOS
-  )
-  
-  d3 <- list(
-    beta = gwas3_1$BETA,
-    varbeta = gwas3_1$SE^2,
-    type = 'cc',
-    snp  = gwas3_1$ID,
-    position = gwas3_1$GENPOS
-  )
-  
-  d4 <- list(
-    beta = gwas4_1$BETA,
-    varbeta = gwas4_1$SE^2,
-    type = 'cc',
-    snp  = gwas4_1$ID,
-    position = gwas4_1$GENPOS
-  )
-  
-  c12 <- coloc.abf(dataset1 = d2, dataset2 = d1, p1 = 1e-4, p2 = 1e-4, p12 = 1e-5)
-  c13 <- coloc.abf(dataset1 = d2, dataset2 = d3, p1 = 1e-4, p2 = 1e-4, p12 = 1e-5)
-  c14 <- coloc.abf(dataset1 = d2, dataset2 = d4, p1 = 1e-4, p2 = 1e-4, p12 = 1e-5)
-  
-  tableList_coloc_TD <- tableList_coloc_TD %>% add_row(tibble(
-    `Immune response - Two dose genetic loci_SNP` = genRiskList[[2]]$rsID[[i]],
-    `Immune response - Two dose genetic loci_CHR` = genRiskList[[2]]$chr[[i]],
-    `Immune response - Two dose genetic loci_POS` = genRiskList[[2]]$pos[[i]],
-    `Immune response - Two dose genetic loci_Immune response - One dose_N` = c12$summary[[1]],
-    `Immune response - Two dose genetic loci_Immune response - One dose_H4 Prob (%)` = round(c12$summary[[6]]*100, digits = 2),
-    `Immune response - Two dose genetic loci_Breakthrough susceptibility_N` = c13$summary[[1]],
-    `Immune response - Two dose genetic loci_Breakthrough susceptibility_H4 Prob (%)` = round(c13$summary[[6]]*100, digits = 2),
-    `Immune response - Two dose genetic loci_Breakthrough severity_N` = c14$summary[[1]],
-    `Immune response - Two dose genetic loci_Breakthrough severity_H4 Prob (%)` = round(c14$summary[[6]]*100, digits = 2)
-  ))
+  d1 <- getColocFormat(gwasList[[1]],genrisk, i, w)
+  d2 <- getColocFormat(gwasList[[2]],genrisk, i, w)
+  d3 <- getColocFormat(gwasList[[3]],genrisk, i, w)
+  d4 <- getColocFormat(gwasList[[4]],genrisk, i, w)
+  if(i == 1 | i == 2){
+    d <- d1
+  }else if(i == 3 | i == 4){
+    d <- d2
+  }else if(i == nrow(genrisk)){
+    d <- d4
+  }else{
+    d <- d3
+  }
+
+  c1 <- coloc.abf(dataset1 = d, dataset2 = d1, p1 = 1e-4, p2 = 1e-4, p12 = 1e-5)
+  c2 <- coloc.abf(dataset1 = d, dataset2 = d2, p1 = 1e-4, p2 = 1e-4, p12 = 1e-5)
+  c3 <- coloc.abf(dataset1 = d, dataset2 = d3, p1 = 1e-4, p2 = 1e-4, p12 = 1e-5)
+  c4 <- coloc.abf(dataset1 = d, dataset2 = d4, p1 = 1e-4, p2 = 1e-4, p12 = 1e-5)
+
+  c[i,1] <- round(c1$summary[6]*100, digits = 2)
+  c[i,2] <- round(c2$summary[6]*100, digits = 2)
+  c[i,3] <- round(c3$summary[6]*100, digits = 2)
+  c[i,4] <- round(c4$summary[6]*100, digits = 2)
+
+  n[i,1] <- c1$summary[1]
+  n[i,2] <- c2$summary[1]
+  n[i,3] <- c3$summary[1]
+  n[i,4] <- c4$summary[1]
 }
 
-
-# Genomic risk loci - BT Susceptibility ========================================
-w <- 250e3
-tableList_coloc_BTSU <- tibble(
-  `Breakthrough susceptibility genetic loci_SNP` = NA,
-  `Breakthrough susceptibility genetic loci_CHR` = NA,
-  `Breakthrough susceptibility genetic loci_POS` = NA,
-  `Breakthrough susceptibility genetic loci_Immune response - One dose_N` = NA,
-  `Breakthrough susceptibility genetic loci_Immune response - One dose_H4 Prob (%)` = NA,
-  `Breakthrough susceptibility genetic loci_Immune response - Two dose_N` = NA,
-  `Breakthrough susceptibility genetic loci_Immune response - Two dose_H4 Prob (%)` = NA,
-  `Breakthrough susceptibility genetic loci_Breakthrough severity_N` = NA,
-  `Breakthrough susceptibility genetic loci_Breakthrough severity_H4 Prob (%)` = NA
-)
-
-for (i in 1:nrow(genRiskList[[3]])){
-  gwas1_1 <- gwasList[[1]] %>% 
-    filter(GENPOS >= genrisk$pos[i]-w-1& GENPOS <= genrisk$pos[i]+w+1)
-  
-  gwas2_1 <- gwasList[[2]] %>%
-    filter(GENPOS >= genrisk$pos[i]-w-1 & GENPOS <= genrisk$pos[i]+w+1)
-  
-  gwas3_1 <- gwasList[[3]] %>%
-    filter(GENPOS >= genrisk$pos[i]-w-1 & GENPOS <= genrisk$pos[i]+w+1)
-  
-  gwas4_1 <- gwasList[[4]] %>%
-    filter(GENPOS >= genrisk$pos[i]-w-1 & GENPOS <= genrisk$pos[i]+w+1)
-  
-  d1 <- list(
-    beta = gwas1_1$BETA,
-    varbeta = gwas1_1$SE^2,
-    type = 'cc',
-    snp  = gwas1_1$ID,
-    position = gwas1_1$GENPOS
-  )
-  
-  d2 <- list(
-    beta = gwas2_1$BETA,
-    varbeta = gwas2_1$SE^2,
-    type = 'cc',
-    snp  = gwas2_1$ID,
-    position = gwas2_1$GENPOS
-  )
-  
-  d3 <- list(
-    beta = gwas3_1$BETA,
-    varbeta = gwas3_1$SE^2,
-    type = 'cc',
-    snp  = gwas3_1$ID,
-    position = gwas3_1$GENPOS
-  )
-  
-  d4 <- list(
-    beta = gwas4_1$BETA,
-    varbeta = gwas4_1$SE^2,
-    type = 'cc',
-    snp  = gwas4_1$ID,
-    position = gwas4_1$GENPOS
-  )
-  
-  c12 <- coloc.abf(dataset1 = d3, dataset2 = d1, p1 = 1e-4, p2 = 1e-4, p12 = 1e-5)
-  c13 <- coloc.abf(dataset1 = d3, dataset2 = d2, p1 = 1e-4, p2 = 1e-4, p12 = 1e-5)
-  c14 <- coloc.abf(dataset1 = d3, dataset2 = d4, p1 = 1e-4, p2 = 1e-4, p12 = 1e-5)
-  
-  tableList_coloc_BTSU <- tableList_coloc_BTSU %>% add_row(tibble(
-    `Breakthrough susceptibility genetic loci_SNP` = genRiskList[[3]]$rsID[[i]],
-    `Breakthrough susceptibility genetic loci_CHR` = genRiskList[[3]]$chr[[i]],
-    `Breakthrough susceptibility genetic loci_POS` = genRiskList[[3]]$pos[[i]],
-    `Breakthrough susceptibility genetic loci_Immune response - One dose_N` = c12$summary[[1]],
-    `Breakthrough susceptibility genetic loci_Immune response - One dose_H4 Prob (%)` = round(c12$summary[[6]]*100, digits = 2),
-    `Breakthrough susceptibility genetic loci_Immune response - Two dose_N` = c13$summary[[1]],
-    `Breakthrough susceptibility genetic loci_Immune response - Two dose_H4 Prob (%)` = round(c13$summary[[6]]*100, digits = 2),
-    `Breakthrough susceptibility genetic loci_Breakthrough severity_N` = c14$summary[[1]],
-    `Breakthrough susceptibility genetic loci_Breakthrough severity_H4 Prob (%)` = round(c14$summary[[6]]*100, digits = 2)
-  ))
-}
-
-# Genomic risk loci - BT Severity ==============================================
-w <- 250e3
-tableList_coloc_BTSE <- tibble(
-  `Breakthrough severity genetic loci_SNP` = NA,
-  `Breakthrough severity genetic loci_CHR` = NA,
-  `Breakthrough severity genetic loci_POS` = NA,
-  `Breakthrough severity genetic loci_Immune response - One dose_N` = NA,
-  `Breakthrough severity genetic loci_Immune response - One dose_H4 Prob (%)` = NA,
-  `Breakthrough severity genetic loci_Immune response - Two dose_N` = NA,
-  `Breakthrough severity genetic loci_Immune response - Two dose_H4 Prob (%)` = NA,
-  `Breakthrough severity genetic loci_Breakthrough Susceptibility_N` = NA,
-  `Breakthrough severity genetic loci_Breakthrough Susceptibility_H4 Prob (%)` = NA
-)
-
-for (i in 1:nrow(genRiskList[[4]])){
-  gwas1_1 <- gwasList[[1]] %>% 
-    filter(GENPOS >= genrisk$pos[i]-w-1& GENPOS <= genrisk$pos[i]+w+1)
-  
-  gwas2_1 <- gwasList[[2]] %>%
-    filter(GENPOS >= genrisk$pos[i]-w-1 & GENPOS <= genrisk$pos[i]+w+1)
-  
-  gwas3_1 <- gwasList[[3]] %>%
-    filter(GENPOS >= genrisk$pos[i]-w-1 & GENPOS <= genrisk$pos[i]+w+1)
-  
-  gwas4_1 <- gwasList[[4]] %>%
-    filter(GENPOS >= genrisk$pos[i]-w-1 & GENPOS <= genrisk$pos[i]+w+1)
-  
-  d1 <- list(
-    beta = gwas1_1$BETA,
-    varbeta = gwas1_1$SE^2,
-    type = 'cc',
-    snp  = gwas1_1$ID,
-    position = gwas1_1$GENPOS
-  )
-  
-  d2 <- list(
-    beta = gwas2_1$BETA,
-    varbeta = gwas2_1$SE^2,
-    type = 'cc',
-    snp  = gwas2_1$ID,
-    position = gwas2_1$GENPOS
-  )
-  
-  d3 <- list(
-    beta = gwas3_1$BETA,
-    varbeta = gwas3_1$SE^2,
-    type = 'cc',
-    snp  = gwas3_1$ID,
-    position = gwas3_1$GENPOS
-  )
-  
-  d4 <- list(
-    beta = gwas4_1$BETA,
-    varbeta = gwas4_1$SE^2,
-    type = 'cc',
-    snp  = gwas4_1$ID,
-    position = gwas4_1$GENPOS
-  )
-  
-  c12 <- coloc.abf(dataset1 = d4, dataset2 = d1, p1 = 1e-4, p2 = 1e-4, p12 = 1e-5)
-  c13 <- coloc.abf(dataset1 = d4, dataset2 = d2, p1 = 1e-4, p2 = 1e-4, p12 = 1e-5)
-  c14 <- coloc.abf(dataset1 = d4, dataset2 = d3, p1 = 1e-4, p2 = 1e-4, p12 = 1e-5)
-  
-  tableList_coloc_BTSE <- tableList_coloc_BTSE %>% add_row(tibble(
-    `Breakthrough severity genetic loci_SNP` = genRiskList[[4]]$rsID[[i]],
-    `Breakthrough severity genetic loci_CHR` = genRiskList[[4]]$chr[[i]],
-    `Breakthrough severity genetic loci_POS` = genRiskList[[4]]$pos[[i]],
-    `Breakthrough severity genetic loci_Immune response - One dose_N` = c12$summary[[1]],
-    `Breakthrough severity genetic loci_Immune response - One dose_H4 Prob (%)` = round(c12$summary[[6]]*100, digits = 2),
-    `Breakthrough severity genetic loci_Immune response - Two dose_N` = c13$summary[[1]],
-    `Breakthrough severity genetic loci_Immune response - Two dose_H4 Prob (%)` = round(c13$summary[[6]]*100, digits = 2),
-    `Breakthrough severity genetic loci_Breakthrough Susceptibility_N` = c14$summary[[1]],
-    `Breakthrough severity genetic loci_Breakthrough Susceptibility_H4 Prob (%)` = round(c14$summary[[6]]*100, digits = 2)
-  ))
-
-}
-
-# Merge all the tables =========================================================
-tableList_coloc <- list()
-tableList_coloc[[1]] <- tableList_coloc_OD %>% 
-  filter(!is.na(`Immune response - One dose genetic loci_SNP`)) %>%
+coloc <- tibble('Phenotype' = c('Immune response - One dose',
+                           'Immune response - One dose',
+                           'Immune response - Two dose',
+                           'Immune response - Two dose',
+                           'Breakthrough susceptibility',
+                           'Breakthrough susceptibility',
+                           'Breakthrough susceptibility',
+                           'Breakthrough susceptibility',
+                           'Breakthrough susceptibility',
+                           'Breakthrough susceptibility',
+                           'Breakthrough severity'),
+           'SNP' = genrisk$rsID,
+           'CHR' = genrisk$chr,
+           'POS' = genrisk$pos,
+           'Immune response_One dose_N' = n[,1],
+           'Immune response_One dose_P(H4) (%)' = c[,1],
+           'Immune response_Two dose_N' = n[,2],
+           'Immune response_Two dose_P(H4) (%)' = c[,2],
+           'Breakthrough_Susceptibility_N' = n[,3],
+           'Breakthrough_Susceptibility_P(H4) (%)' = c[,3],
+           'Breakthrough_Severity_N' = n[,4],
+           'Breakthrough_Severity_P(H4) (%)' = c[,4]) %>%
   flextable() %>%
   span_header(sep = "_") %>%
-  align(align = 'center', part = 'all') %>%
-  bg(i = 1, bg = "#C8C8C8", part = "head") %>%
-  bg(i = 2, j = c(4,8), bg = "#EFEFEF", part = "head") %>%
-  bg(i = 3, j = c(4,6,8), bg = "#EFEFEF", part = "head") %>%
-  bg(i = 1:2, j = c(4,6,8), bg = "#EFEFEF", part = "body") %>%
   bold(bold = TRUE, part="header") %>%
+  align(align = 'center', part = "all") %>%
+  align(i = 1, align = 'center', part = "header") %>%
+  align(i = 2, align = 'center', part = "header") %>%
+  align(i = 3, align = 'center', part = "header") %>%
+  align(align = "center",part = "all") %>%
+  width(j = 'Phenotype', width = 3.45, unit = 'cm') %>%
+  width(j = 'SNP', width = 3.25, unit = 'cm') %>%
+  width(j = 'CHR', width = 1.6, unit = 'cm') %>%
+  width(j = 'POS', width = 2.35, unit = 'cm') %>%
+  width(j = 'Immune response_One dose_N', width = 1.45, unit = 'cm') %>%
+  width(j = 'Immune response_Two dose_N', width = 1.45, unit = 'cm') %>%
+  width(j = 'Breakthrough_Susceptibility_N', width = 1.45, unit = 'cm') %>%
+  width(j = 'Breakthrough_Severity_N', width = 1.45, unit = 'cm') %>%
+  width(j = 'Immune response_One dose_P(H4) (%)', width = 2, unit = 'cm') %>%
+  width(j = 'Immune response_Two dose_P(H4) (%)', width = 2, unit = 'cm') %>%
+  width(j = 'Breakthrough_Susceptibility_P(H4) (%)', width = 2, unit = 'cm') %>%
+  width(j = 'Breakthrough_Severity_P(H4) (%)', width = 2, unit = 'cm') %>%
+  bg(j = 'Immune response_One dose_N', bg = "#EFEFEF", part = "all") %>% 
+  bg(j = 'Immune response_Two dose_N', bg = "#EFEFEF", part = "body") %>%
+  bg(i = 3, j = c(7,9,11), bg = "#EFEFEF", part = "all") %>%
+  bg(j = 'Breakthrough_Susceptibility_N', bg = "#EFEFEF", part = "body") %>%
+  bg(i = 2, j = 9, bg = "#EFEFEF", part = "header")  %>%
+  bg(j = 'Breakthrough_Severity_N', bg = "#EFEFEF", part = "body") %>%
   fontsize(size = 11, part = "all") %>%
-  font(fontname='Calibri',part = "all") %>%
-  vline(j = seq(3,7,2))
+  font(fontname='Calibri',part = "all")
+save_as_docx(coloc, path = paste0(dir_results,'Tables/Coloc.docx'))
+
   
-tableList_coloc[[2]] <- tableList_coloc_TD %>% 
-  filter(!is.na(`Immune response - Two dose genetic loci_SNP`)) %>%
-  flextable() %>%
-  span_header(sep = "_") %>%
-  align(align = 'center', part = 'all') %>%
-  bg(i = 1, bg = "#C8C8C8", part = "head") %>%
-  bg(i = 2, j = c(4,8), bg = "#EFEFEF", part = "head") %>%
-  bg(i = 3, j = c(4,6,8), bg = "#EFEFEF", part = "head") %>%
-  bg(i = 1:2, j = c(4,6,8), bg = "#EFEFEF", part = "body") %>%
-  bold(bold = TRUE, part="header") %>%
-  fontsize(size = 11, part = "all") %>%
-  font(fontname='Calibri',part = "all") %>%
-  vline(j = seq(3,7,2))
-
-tableList_coloc[[3]] <- tableList_coloc_BTSU %>% 
-  filter(!is.na(`Breakthrough susceptibility genetic loci_SNP`)) %>%
-  flextable() %>%
-  span_header(sep = "_") %>%
-  align(align = 'center', part = 'all') %>%
-  bg(i = 1, bg = "#C8C8C8", part = "head") %>%
-  bg(i = 2, j = c(4,8), bg = "#EFEFEF", part = "head") %>%
-  bg(i = 3, j = c(4,6,8), bg = "#EFEFEF", part = "head") %>%
-  bg(i = 1:2, j = c(4,6,8), bg = "#EFEFEF", part = "body") %>%
-  bold(bold = TRUE, part="header") %>%
-  fontsize(size = 11, part = "all") %>%
-  font(fontname='Calibri',part = "all") %>%
-  vline(j = seq(3,7,2))
-
-tableList_coloc[[4]] <- tableList_coloc_BTSE %>% 
-  filter(!is.na(`Breakthrough severity genetic loci_SNP`)) %>%
-  flextable() %>%
-  span_header(sep = "_") %>%
-  align(align = 'center', part = 'all') %>%
-  bg(i = 1, bg = "#C8C8C8", part = "head") %>%
-  bg(i = 2, j = c(4,8), bg = "#EFEFEF", part = "head") %>%
-  bg(i = 3, j = c(4,6,8), bg = "#EFEFEF", part = "head") %>%
-  bg(j = c(4,6,8), bg = "#EFEFEF", part = "body") %>%
-  bold(bold = TRUE, part="header") %>%
-  fontsize(size = 11, part = "all") %>%
-  font(fontname='Calibri',part = "all") %>%
-  vline(j = seq(3,7,2))
-save_as_docx(values = tableList_coloc, path = paste0(dir_results,'Tables/Colocalisation.docx'))
+# Study of those variants that colocalise
+genrisk <- genrisk %>% filter(rsID == "rs681343")
+gwas1 <- gwasList[[1]] %>%
+  filter(GENPOS >= genrisk$pos[1]-w-1 & GENPOS <= genrisk$pos[1]+w+1 & CHROM == genrisk$chr[1]) %>%
+  mutate(f = if_else(ID == "rs681343",1,0)) %>%
+  arrange(f)
+gwas3 <- gwasList[[3]] %>%
+  filter(GENPOS >= genrisk$pos[1]-w-1 & GENPOS <= genrisk$pos[1]+w+1 & CHROM == genrisk$chr[1]) %>%
+  mutate(f = if_else(ID == "rs681343",1,0)) %>%
+  arrange(f)
+  
+library(extrafont)
+font_import()
+windowsFonts("Calibri" = windowsFont("Calibri"))
 
 
+gplot1 <- ggplot(gwas1, aes(x = GENPOS, y = LOG10P)) +
+  # Show all points
+  geom_point(size = 1.25, aes(colour = as.factor(f)), shape = 16) +
+  scale_color_manual(values = c("#4393C3",  "red")) +
+  # custom X axis:
+  scale_y_continuous(breaks = seq(0,6,1), limits = c(0,6.2), expand = c(0,0)) +     # remove space between plot area and x axis
+  # # Custom the theme:
+  theme_bw() +
+  theme( 
+    legend.position="none",
+    # panel.border = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    axis.line.x = element_line(color = "black", linewidth = 0.5),
+    axis.line.y = element_line(color = "black", linewidth = 0.5),
+    axis.text.x = element_text(margin = margin(t = 1), size = 11),
+    axis.text.y  = element_text(size = 11),
+    axis.title = element_text(size = 11),
+    plot.title = element_text(face = "bold"),
+    text = element_text(family = "Calibri")
+  ) +
+  #Plot a red horizontal line at 5e-8
+  geom_hline(yintercept = -log10(5e-8), linewidth = 0.3) +
+  labs(x = 'Chromosome 19 [BP]', y = expression(-log[10](P))) +
+  ggtitle('(A) Immune response - one dose') 
+
+gplot3 <- ggplot(gwas3, aes(x = GENPOS, y = LOG10P)) +
+  # Show all points
+  geom_point(size = 1.25, aes(colour = as.factor(f)), shape = 16) +
+  scale_color_manual(values = c("#4393C3",  "red")) +
+  # custom X axis:
+  scale_y_continuous(breaks = seq(0,14,2), limits = c(0,14.2), expand = c(0,0)) +     # remove space between plot area and x axis
+  # # Custom the theme:
+  theme_bw() +
+  theme( 
+    legend.position="none",
+    # panel.border = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    axis.line.x = element_line(color = "black", linewidth = 0.5),
+    axis.line.y = element_line(color = "black", linewidth = 0.5),
+    axis.text.x = element_text(margin = margin(t = 1), size = 11),
+    axis.text.y  = element_text(size = 11),
+    axis.title = element_text(size = 11),
+    plot.title = element_text(face = "bold"),
+    text = element_text(family = "Calibri")
+  ) +
+  #Plot a red horizontal line at 5e-8
+  labs(x = 'Chromosome 19 [BP]', y = expression(-log[10](P))) +
+  ggtitle('(B) Breakthrough susceptibility') 
+
+ggsave('gwas1.png', plot = gplot1, path = paste0(dir_results,'Figures/mh_1.png'), height = 6.7, width = 22.4, units = 'cm',dpi = 300)
+ggsave('gwas3.png', plot = gplot3, path = paste0(dir_results,'Figures/mh_3.png'), height = 6.7, width = 22.4, units = 'cm',dpi = 300)
+
+
+g <- gwas1 %>% select(ID, B1 = BETA, ALLELE1) %>% inner_join(gwas3 %>% select(ID, B2 = BETA, ALLELE1)) %>%
+  mutate(OR1 = exp(B1), OR2 = exp(B2))
+ggplot(g, aes(x = OR1, y = OR2)) + geom_point()
+a <- lm(OR2 ~ OR1, data = g)
