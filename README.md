@@ -44,6 +44,7 @@ Also, the following variables must be specified:
     -> dir_ukb  <- "...": The path where ukb files are
 
 The ukb directory must contain the file "ukb65397.tab", with the following columns:
+
      -> f.21001.0.0: Body mass index
      -> f.26410.0.0: Index of multiple deprivation (England)
      -> f.26427.0.0: Index of multiple deprivation (Scotland)
