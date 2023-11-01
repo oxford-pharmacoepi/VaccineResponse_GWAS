@@ -49,7 +49,7 @@ one_vaccine_cohort <- vaccine_cohort %>%
          Age = Age_antibody_test_performed, 
          Genetic_batch, 
          PC1, PC2, PC3, PC4, PC5, PC6, PC7, PC8, PC9, PC10)
-write.csv(one_vaccine_cohort,paste0(dir_results,'Cohorts/immuneResponse_ImputedData_one_dose_cohort.csv'))
+write.csv(one_vaccine_cohort,paste0(dir_results,'Cohorts/imputedData_oneDose.csv'))
 
 # TWO VACCINE COHORT -----------------------------------------------------------
 two_vaccine_cohort <- vaccine_cohort %>%
@@ -67,7 +67,7 @@ two_vaccine_cohort <- vaccine_cohort %>%
          Age = Age_antibody_test_performed, 
          Genetic_batch, 
          PC1, PC2, PC3, PC4, PC5, PC6, PC7, PC8, PC9, PC10)
-write.csv(two_vaccine_cohort,paste0(dir_results,'Cohorts/immuneResponse_ImputedData_two_dose_cohort.csv'))
+write.csv(two_vaccine_cohort,paste0(dir_results,'Cohorts/imputedData_twoDose.csv'))
 
 # .PHE FILES
 one_dose_cohort <- as.phe(one_vaccine_cohort, "FID", "IID") %>% 
@@ -77,8 +77,8 @@ two_dose_cohort <- as.phe(two_vaccine_cohort, "FID", "IID") %>%
   rename('FID' = 'pid',
          'IID' = 'id')
 
-write.phe(paste0(dir_results,'/Cohorts/immuneResponse_ImputedData_one_dose_cohort.phe'), one_dose_cohort)
-write.phe(paste0(dir_results,'/Cohorts/immuneResponse_ImputedData_two_dose_cohort.phe'), two_dose_cohort)
+write.phe(paste0(dir_results,'/Cohorts/imputedData_oneDose.phe'), one_dose_cohort)
+write.phe(paste0(dir_results,'/Cohorts/imputedData_twoDose.phe'), two_dose_cohort)
 
 
 # Validation -------------------------------------------------------------------
@@ -136,5 +136,5 @@ two_dose_cohort <- as.phe(two_vaccine_cohort, "FID", "IID") %>%
   rename('FID' = 'pid',
          'IID' = 'id')
 
-write.phe(paste0(dir_results,'/Cohorts/immuneResponse_ImputedData_one_dose_cohort_validation.phe'), one_dose_cohort)
-write.phe(paste0(dir_results,'/Cohorts/immuneResponse_ImputedData_two_dose_cohort_validation.phe.phe'), two_dose_cohort)
+write.phe(paste0(dir_results,'/Cohorts/imputedData_oneDose_Validation.phe'), one_dose_cohort)
+write.phe(paste0(dir_results,'/Cohorts/imputedData_twoDose_Validation.phe.phe'), two_dose_cohort)

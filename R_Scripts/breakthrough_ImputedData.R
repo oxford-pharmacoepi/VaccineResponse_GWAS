@@ -29,11 +29,11 @@ breakthrough_severity <- breakthrough %>%
 breakthrough <- breakthrough %>%
   select(-breakthrough_infection_type, -severity_index)
 
-write.csv(breakthrough, paste0(dir_results,'/Cohorts/breakthrough_ImputedData_covidSusceptibility.csv'))
-write.csv(breakthrough_severity, paste0(dir_results,'/Cohorts/breakthrough_ImputedData_covidSeverity.csv'))
+write.csv(breakthrough, paste0(dir_results,'/Cohorts/imputedData_breakthroughSusceptibility.csv'))
+write.csv(breakthrough_severity, paste0(dir_results,'/Cohorts/imputedData_breakthroughSeverity.csv'))
 
-write.phe(paste0(dir_results,'/Cohorts/breakthrough_ImputedData_covidSusceptibility.phe'), as.phe(breakthrough, pid = 'FID', id = 'IID'))
-write.phe(paste0(dir_results,'/Cohorts/breakthrough_ImputedData_covidSeverity.phe'), as.phe(breakthrough_severity, pid = 'FID', id = 'IID'))
+write.phe(paste0(dir_results,'/Cohorts/imputedData_breakthroughSusceptibility.phe'), as.phe(breakthrough, pid = 'FID', id = 'IID'))
+write.phe(paste0(dir_results,'/Cohorts/imputedData_breakthroughSeverity.phe'), as.phe(breakthrough_severity, pid = 'FID', id = 'IID'))
 
 
 # Validation -------------------------------------------------------------------
@@ -59,6 +59,6 @@ breakthrough_severity <- breakthrough %>%
 breakthrough <- breakthrough %>%
   select(-breakthrough_infection_type, -severity_index)
 
-write.phe(paste0(dir_results,'/Cohorts/breakthrough_ImputedData_covidSusceptibility_validation.phe'), as.phe(breakthrough, pid = 'FID', id = 'IID'))
-write.phe(paste0(dir_results,'/Cohorts/breakthrough_ImputedData_covidSeverity_validation.phe'), as.phe(breakthrough_severity, pid = 'FID', id = 'IID'))
+write.phe(paste0(dir_results,'/Cohorts/imputedData_breakthroughSusceptibility_validation.phe'), as.phe(breakthrough, pid = 'FID', id = 'IID'))
+write.phe(paste0(dir_results,'/Cohorts/imputedData_breakthroughSeverity_validation.phe'), as.phe(breakthrough_severity, pid = 'FID', id = 'IID'))
 

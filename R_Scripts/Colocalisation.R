@@ -1,20 +1,7 @@
-# Colocalisation
-if(!require("remotes"))
-  install.packages("remotes") # if necessary
-library(remotes)
-install_github("chr1swallace/coloc@main",build_vignettes=TRUE)
-
-rm(list = ls())
-pacman::p_load('dplyr','tibble','readr','here',
-               'lubridate','pbatR','forcats','tableone',
-               'qqman','RColorBrewer','ggplot2','gridGraphics','xlsx','stringr',
-               'grid','gridExtra','tidyverse','egg','flextable','ftExtra','officer')
-library(coloc)
-# Directory where the data is
-dir_data <- 'C:/Users/martaa/Desktop/Projects/VaccineResponse_GWAS/'
-dir_ukb  <- 'C:/Users/martaa/Desktop/Projects/UKBiobank_65397/'
-dir_results <- paste0(dir_data,'Results/')
-
+# ==============================================================================
+#                            Colocalisation analysis 
+#                          Marta Alcalde-Herraiz, 2023
+# ==============================================================================
 ch  <- c('oneDose', 
          'twoDose',
          'breakthroughSusceptibility',
@@ -140,7 +127,7 @@ coloc <- tibble('Phenotype' = c('Immune response - One dose',
   bg(j = 'Breakthrough_Severity_N', bg = "#EFEFEF", part = "body") %>%
   fontsize(size = 11, part = "all") %>%
   font(fontname='Calibri',part = "all")
-save_as_docx(coloc, path = paste0(dir_results,'Tables/Coloc.docx'))
+save_as_docx(coloc, path = paste0(dir_results,'Tables/Colocalisation.docx'))
 
   
 # Study of those variants that colocalise
@@ -214,11 +201,6 @@ gplot3 <- ggplot(gwas3, aes(x = GENPOS, y = LOG10P)) +
   labs(x = 'Chromosome 19 [BP]', y = expression(-log[10](P))) +
   ggtitle('(B) Breakthrough susceptibility') 
 
-ggsave('gwas1.png', plot = gplot1, path = paste0(dir_results,'Figures/mh_1.png'), height = 6.7, width = 22.4, units = 'cm',dpi = 300)
-ggsave('gwas3.png', plot = gplot3, path = paste0(dir_results,'Figures/mh_3.png'), height = 6.7, width = 22.4, units = 'cm',dpi = 300)
+ggsave('mh_1.png', plot = gplot1, path = paste0(dir_results,'Figures/mh_1.png'), height = 6.7, width = 22.4, units = 'cm',dpi = 300)
+ggsave('mh_3.png', plot = gplot3, path = paste0(dir_results,'Figures/mh_3.png'), height = 6.7, width = 22.4, units = 'cm',dpi = 300)
 
-
-g <- gwas1 %>% select(ID, B1 = BETA, ALLELE1) %>% inner_join(gwas3 %>% select(ID, B2 = BETA, ALLELE1)) %>%
-  mutate(OR1 = exp(B1), OR2 = exp(B2))
-ggplot(g, aes(x = OR1, y = OR2)) + geom_point()
-a <- lm(OR2 ~ OR1, data = g)

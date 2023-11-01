@@ -62,58 +62,6 @@ gwas <- gwas %>%
   mutate(Vali = if_else(sign(Validation_OR-1) == sign(Main.analysis_OR-1),1,0)) %>%
   mutate(Vali = if_else(sign(Validation_OR-1) == sign(Main.analysis_OR-1) & Validation_P.Value <= 0.05,2,Vali))
 
-# tab <- gwas %>% 
-#   select(c('CHROM','ID','Phenotype','Vali') | contains('Validation')) %>%
-#   mutate(Type = 'Validation') %>%
-#   rename('N' = 'Validation_N',
-#          'OR' = 'Validation_OR',
-#          'P.Value' = 'Validation_P.Value',
-#          'Lower' = 'Validation_Lower',
-#          'Upper' = 'Validation_Upper') 
-# 
-# tab <- tab %>%
-#   mutate(order = 1:nrow(tab)) %>%
-#   full_join(gwas %>%
-#               select(c('CHROM','ID','Phenotype','Vali') | contains('Main.analysis')) %>%
-#               mutate(Type = 'Main') %>%
-#               rename('N' = 'Main.analysis_N',
-#                      'OR' = 'Main.analysis_OR',
-#                      'P.Value' = 'Main.analysis_P.Value',
-#                      'Lower' = 'Main.analysis_Lower',
-#                      'Upper' = 'Main.analysis_Upper') %>%
-#               mutate(order = 1:nrow(tab))) %>%
-#   mutate(Type = factor(Type, levels = c('Validation','Main'))) %>%
-#   mutate(Vali = factor(Vali, levels = c('0','1','2')))
-
-# a <- ggplot(tab, aes(x = order,y = OR)) +
-#   geom_errorbar(
-#     aes(ymin = Lower, ymax = Upper, color = Vali, shape = Type),
-#     position = position_dodge(width = dodge), width = w, cex = ww
-#   ) +
-#   geom_point(aes(y = OR, color = Vali, shape = Type, size = Type),
-#              position = position_dodge(width = dodge)) +
-#   geom_hline(yintercept = 1, linetype = "dashed", size = 1) +
-#   scale_shape_manual(values = c(shape_main,shape_val)) +
-#   scale_color_manual(values = c("2" = '#72ACB9',"1"='#D57100',"0"='#EFBA00')) +
-#   scale_size_manual(values = c(2.5,2.5)) +
-#   theme_gray() +
-#   # facet_wrap(~Phenotype, strip.position = 'top') +
-#   theme(strip.text.x = element_text(size = 11, face = "bold"),
-#         axis.title.x = element_blank(),
-#         axis.text.x  = element_text(),
-#         axis.text.y  = element_text(size = 10),
-#         axis.title.y = element_blank(),
-#         legend.position = "none",
-#         text = element_text(family = 'Calibri')) +
-#   scale_x_continuous(
-#     breaks = tab$order,
-#     labels = tab$ID,
-#     expand = c(0,0),
-#     limits = c(0.5,nrow(tab)/2+.5)
-#   ) +
-#   scale_y_log10(breaks = c(0.5,0.75,1,1.25,1.5), limits = c(0.45, 1.55)) +
-#   coord_flip()
-
 
 for(i in c(1:length(nam))){
   tab <- gwas %>% filter(Phenotype == nam[i]) %>%
@@ -231,29 +179,6 @@ legq2 <- ggplot(leg2, aes(or, y)) +
         legend.text = element_text(size = 11),
         text = element_text(family = 'Calibri'))
 
-# n <- 16.22
-# aux <- ggplot() + theme_void() + 
-#   scale_y_continuous(
-#     expand = c(0,0),
-#     limits = c(-1,45)) +
-#   scale_x_continuous(
-#     expand = c(0,0),
-#     limits = c(-1,1)) +
-#   annotation_custom(ggplotGrob(legq1), # Legend
-#                     ymin = 40, ymax = 45,
-#                     xmin = -.7, xmax = 1) +
-#   annotation_custom(ggplotGrob(legq2),
-#                     ymin = 35, ymax = 43.5,
-#                     xmin = -.7, xmax = 1) +
-#   annotation_custom(ggplotGrob(a),
-#                     ymin = 0, ymax = 41.5,
-#                     xmin = -1, xmax = 1) +
-#   geom_rect(aes(xmin = -.7525, xmax = 0.9875, ymin = 2.325, ymax = 2.325+1.395),
-#             fill = "#D9D9D9") +
-#   geom_text(aes(x = 0.1175), y = 3, label = 'Breakthrough severity', vjust = 'middle', hjust = 'middle', family = 'Calibri', size = 4.5, fontface = 'bold') +
-#   geom_rect(aes(xmin = -.7525, xmax = 0.9875, ymin = n, ymax = n+1.37),
-#             fill = "#D9D9D9") +
-#   geom_text(aes(x = 0.1175), y = 16.97, label = 'Breakthrough susceptibility', vjust = 'middle', hjust = 'middle', family = 'Calibri', size = 4.5, fontface = 'bold') 
 
 aux <- ggplot() + theme_void() + ylim(-9,45) + xlim(-1.2,1) +
   annotation_custom(ggplotGrob(legq1), # Legend

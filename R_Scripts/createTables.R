@@ -32,91 +32,6 @@ nam1 <- c('Immune response_One dose',
          'Breakthrough_Severity')
 
 
-# Table 1 OLD ==================================================================
-# tableList <- list()
-# tableList_Ones <- list()
-# outc  <- c('CAD','MI','IS','Hypertension','T2DM')
-# outc1 <- c('Coronary artery disease', 'Myocardial infarction','Ischaemic stroke','Hypertension','Type 2 diabetes mellitus')
-# outcomes <- c('immuneResponse','immuneResponse','bt_infection','severity')
-# for(i in 1:4){
-#   gwas <- read_delim(paste0(dir_results,'GWAS/imputedData_',ch[i],'.txt'))
-#   pop  <- read_delim(paste0(dir_results,'Cohorts/imputedData_',ch[i],'.csv')) %>% select('eid'='FID',  outcomes[i],'Sex','Age') %>%
-#     left_join(ukb %>% select('eid','BMI' = 'f21001.0.0'))
-#   outc <- c('CAD','MI','IS','Hypertension','T2DM')  
-#   tableList[[i]] <- pop
-#   
-#   for (j in 1:length(outc)){
-#     source(here('R_Scripts','PhenotypingHES.R'))
-#     hes_data <- PhenotypingHes(outc[j],hes,pop %>% select('eid'))
-#     
-#     source(here("R_Scripts","PhenotypingGP.R"))
-#     gp_data <- PhenotypingGP(outc[j],gp,pop %>% select('eid'))
-#     
-#     source(here("R_Scripts","PhenotypingUKB.R"))
-#     ukb_data <- as_tibble(PhenotypingUKB(outc[j],pop %>% select('eid'),ukb))
-#     
-#     source(here('R_Scripts','mergeTables.R'))
-#     data <- mergeTables(ukb_data,hes_data,gp_data)
-#     
-#     tableList[[i]] <- tableList[[i]] %>% left_join(data %>% select(eid, state), by = 'eid')
-#     names(tableList[[i]])[names(tableList[[i]]) == 'state'] <- outc1[j]
-#   }
-#   
-#   names(tableList[[i]])[names(tableList[[i]]) == outcomes[i]] <- nam[i]
-#   tableList[[i]] <- tableList[[i]] %>% 
-#     mutate(Sex = as.factor(Sex)) %>%
-#     mutate(`Coronary artery disease` = as.factor(`Coronary artery disease`),
-#            `Myocardial infarction` = as.factor(`Myocardial infarction`),
-#            `Ischaemic stroke` = as.factor(`Ischaemic stroke`),
-#            `Hypertension` = as.factor(`Hypertension`),
-#            `Type 2 diabetes mellitus` = as.factor(`Type 2 diabetes mellitus`))
-#   
-#   tableOnes[[i]] <- CreateTableOne(vars = colnames(tableList[[i]])[3:length(colnames(tableList[[i]]))], 
-#                                    data = tableList[[i]],
-#                                    strata = nam[i],
-#                                    test = FALSE,
-#                                    includeNA = FALSE) %>%
-#     print(smd = TRUE, showAllLevels = TRUE)
-#   
-#    aux <- as_tibble(tableOnes[[i]]) %>%
-#     mutate(Variables = rownames(tableOnes[[i]])) %>%
-#     relocate(Variables) %>%
-#     rename("Controls" = "0",
-#            "Cases" = "1") %>% 
-#     mutate("level" = case_when(level == "0" ~ 'Controls',
-#                                level == "1" ~ 'Cases',
-#                                .default = " "))
-#    aux[2,2] <- 'Females'
-#    aux[3,2] <- 'Males'
-#    
-#    tableList_Ones[[i]] <- aux %>%
-#      rename(" " = "level") %>%
-#      flextable() %>%
-#      align(align = "center",part = "all") %>%
-#      set_caption(caption = nam[i]) %>%
-#      fontsize(size = 11, part = "all") %>%
-#      font(fontname='Calibri',part = "all") %>%
-#      bg(i = 1, bg = "#EFEFEF", part = "header") %>%
-#      width(j = c(3,4), 2.7, unit = 'cm') %>%
-#      width(j = 1, 3, unit = 'cm') %>%
-#      merge_at(i = c(2:3), j = 1) %>%
-#      merge_at(i = c(6:7), j = 1) %>%
-#      merge_at(i = c(8:9), j = 1) %>%
-#      merge_at(i = c(10:11), j = 1) %>%
-#      merge_at(i = c(12:13), j = 1) %>%
-#      merge_at(i = c(14:15), j = 1) %>%
-#      merge_at(i = c(2:3), j = 5) %>%
-#      merge_at(i = c(6:7), j = 5) %>%
-#      merge_at(i = c(8:9), j = 5) %>%
-#      merge_at(i = c(10:11), j = 5) %>%
-#      merge_at(i = c(12:13), j = 5) %>%
-#      merge_at(i = c(14:15), j = 5) %>%
-#      hline(i = c(1,3,4,5,7,9,11,13), part = 'body') %>%
-#      hline_bottom(part = "body", border = fp_border(color = "black", width = 1.5)) %>%
-#      hline_top(part = 'all', border = fp_border(color = "black", width = 1.5))
-# }
-
-
 
 # Table 1 ======================================================================
 ukb <- tibble(read_delim(paste0(dir_ukb,'ukb65397.tab'))) %>%
@@ -254,7 +169,7 @@ for(i in 1:4){
 
 
 # Table 2 - Validation ---------------------------------------------------------
-tableList_Validation <- list()
+tableListValidation <- list()
 for(i in 1:4){
   genomicRL   <- read_delim(paste0(dir_results,'FUMA/',ch[i],'/GenomicRiskLoci.txt'))
   order <- getOrder(genomicRL)
@@ -292,7 +207,7 @@ gwas <- tableListValidation[[1]] %>%
 
 write.table(gwas,paste0(dir_results,'/Validation/Validation.txt'))
 
-tableList_Validation[[i]] <- gwas %>%
+tableList_Validation <- gwas %>%
   select(-CHROM,-`Main analysis_Lower`,-`Main analysis_Upper`,-`Validation_Upper`,-`Validation_Lower`) %>%
   relocate('Main analysis_N', .after = 'ID') %>%
   relocate('Main analysis_OR', .after = 'Main analysis_N') %>%
@@ -414,15 +329,11 @@ tableList_Comparator <- t %>%
 
 
 
-tList <- list(tableList_Ones[[1]],
-              tableList_Ones[[2]],
-              tableList_Ones[[3]],
-              tableList_Ones[[4]],
-              tableList_SNPs[[1]],
+tList <- list(tableList_SNPs[[1]],
               tableList_SNPs[[2]],
               tableList_SNPs[[3]],
               tableList_SNPs[[4]],
-              tableList_Validation[[4]], 
+              tableList_Validation, 
               tableList_Comparator)
 save_as_docx(values = tList, path = paste0(dir_results,'Tables/AllTables.docx'))
 

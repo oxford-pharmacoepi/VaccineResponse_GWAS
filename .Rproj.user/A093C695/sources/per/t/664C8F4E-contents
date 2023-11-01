@@ -8,14 +8,22 @@ pacman::p_load('dplyr','tibble','readr','here',
                'qqman','RColorBrewer','ggplot2','gridGraphics','xlsx','stringr',
                'grid','gridExtra','tidyverse','egg','flextable','ftExtra','officer')
 
+if(!require("remotes"))
+  install.packages("remotes") # if necessary
+library(remotes)
+install_github("chr1swallace/coloc@main",build_vignettes=TRUE)
+library(coloc)
+
 # Directory where the data is
 dir_data <- 'C:/Users/martaa/Desktop/Projects/VaccineResponse_GWAS/'
 dir_ukb  <- 'C:/Users/martaa/Desktop/Projects/UKBiobank_65397/'
-dir_results <- paste0(dir_data,'Results/')
+
 
 
 # SCRIPTS TO MAKE THE COHORTS --------------------------------------------------
 dir.create(paste0(dir_data,'Results'))
+dir_results <- paste0(dir_data,'Results/')  # Directory where the results will be saved
+
 dir.create(paste0(dir_results,'Cohorts'))
 
 # Immune response cohort:
@@ -24,37 +32,93 @@ source(here('R_Scripts','immuneResponse_ImputedData.R'))
 # Breakthrough infection cohort:
 source(here('R_Scripts','breakthrough_ImputedData.R'))
 
+# Run the GWAS in the RAP PLATFORM ---------------------------------------------
+dir.create(paste0(dir_results,'GWAS'))
+# Save the results within the "GWAS" folder under the names:
+# imputedData_breakthroughSeverity.txt
+# imputedData_breakthroughSeverity_Validation.txt
 
-# SCRIPTS TO MAKE THE TABLES FROM THE PAPER ------------------------------------
+# Run FUMA ---------------------------------------------------------------------
+# Run FUMA with the following specifications:
+# Note: You may need to convert to .gz files the GWAS
+# [INPUT FILES]
+# - chrcol = CHROM
+# - poscol = GENPOS
+# - rsIDcol = ID
+# - pcol = P
+# - eacol = ALLELE1
+# - neacol = ALLELE0
+# - orcol = NA
+# - becol = BETA
+# - secol = SE
+# - leadSNPsfile = NA
+# - addleadSNPs = 1
+# - regionsfile = NA
+# [PARAMETERS]
+# - GRCh38 = 0
+# - N = NA
+# - Ncol = N
+# - exMHC = 0
+# - MHCopt = NA
+# - extMHC = NA
+# - ensembl = v102
+# - genetype = protein_coding
+# - leadP = 5e-8
+# - gwasP = 0.05
+# - r2 = 0.6
+# - r2_2 = 0.1
+# - refpanel = 1KG/Phase3
+# - pop = EUR
+# - MAF = 0
+# - refSNPs = 1
+# - mergeDist = 250
+# [MAGMA]
+# - magma = 0
+# [posMap]
+# - posMap = 1
+# - posMapWindowSize = 10
+# - posMapAnnot = NA
+# - posMapCADDth = 0
+# - posMapRDBth = NA
+# - posMapChr15 = NA
+# - posMapChr15Max = NA
+# - posMapChr15Meth = NA
+# - posMapAnnoDs = NA
+# - posMapAnnoMeth = NA
+# [eqtlMap]
+# - eqtlMap = 0
+# [ciMap]
+# - ciMap = 0
+
+dir.create(paste0(dir_results,'FUMA'))
+dir.create(paste0(dir_results,'FUMA/oneDose'))
+dir.create(paste0(dir_results,'FUMA/twoDose'))
+dir.create(paste0(dir_results,'FUMA/breakthroughSusceptibility'))
+dir.create(paste0(dir_results,'FUMA/breakthroughSeverity'))
+# Save the results within each folder. Files you may have to download include:
+# - GenomicRisk.Loci.txt
+# - leadSNPs.txt
+# - IndSigSNPs.txt
+# - annov.txt
+# - annov.stats.txt
+# - gwascatalog.txt
+# - params.config
+# - README.txt for more detailed information
+
+# Colocalisation analysis: 
+dir.create(paste0(dir_results,'Tables'))
+dir.create(paste0(dir_results,'Figures'))
+source(here("R_Scripts","Colocalisation.R"))
 
 
+# SCRIPTS TO MAKE THE TABLES/FIGURES FROM THE PAPER ----------------------------
+dir.create(paste0(dir_results,'Validation'))
+source(here("R_Scripts","createTables.R"))
+source(here("R_Scripts","CreateFigure_Validation.R"))
 dir.create(paste0(dir_results,'Tables'))
 source(here('R_Scripts','CreateTable.R'))
-source(here('R_Scripts','CreateTable_Validation.R'))
+source(here('R_Scripts','CreateManhattanPlot.R'))
 
-
-# hes  <- as_tibble(read.delim(paste0(dir_data,'hesin_diag.txt'), sep = "\t", quote = ""))
-# hesD <- as_tibble(read.delim(paste0(dir_data,'hesin.txt'), sep = "\t", quote = ""))
-# gp   <- as_tibble(read.delim(paste0(dir_data,'gp_clinical.txt'), sep = "\t", quote = ""))
-# ukb <- as_tibble(read.delim(paste0(dir_data,'ukb669864_logistic.csv'), sep = "\t", quote = ""))
-
-hes  <- as_tibble(read.delim(paste0(dir_ukb,"hesin_diag.txt"),sep = "\t", quote = ""))
-hesD <- as_tibble(read.delim(paste0(dir_ukb,"hesin.txt"), sep = "\t", quote = "")) %>% 
-  mutate(epistart = as.Date(epistart,'%d/%m/%Y')) %>%
-  mutate(epiend   = as.Date(epiend, '%d/%m/%Y')) %>%
-  mutate(year     = year(epistart)) %>%
-  filter(year <= 2019)
-gp <- as_tibble(read.delim(paste0(dir_ukb,"gp_clinical.txt"),sep = "\t", quote = "")) 
-gp <- gp %>% 
-  filter(event_dt != "01/01/1900",
-         event_dt != "01/01/1901",
-         event_dt != "02/02/1902",
-         event_dt != "03/03/1903",
-         event_dt != "07/07/2037") %>%
-  mutate(event_dt = as.Date(event_dt, format = '%d/%m/%Y')) %>%
-  mutate(year     = year(event_dt)) %>%
-  filter(year <= 2019)
-ukb <- as_tibble(read_delim(paste0(dir_ukb,'ukb65397.csv')))
 
 # SCRIPTS TO MAKE THE FIGURES FROM THE PAPER -----------------------------------
 source(here('R_Scripts','Figure.R'))
