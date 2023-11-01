@@ -3,7 +3,6 @@
 
 **Objective**: To perform four genome wide association studies among vaccinated participants for COVID-19 vaccine antibody response and breakthrough outcomes. 
 
-    
 For more information: [LINK TO THE ARTICLE]
 
 # Running the analysis
@@ -42,9 +41,30 @@ Previously, you must ensure that you have a directory "${folder directory}" with
 Also, the following variables must be specified:
 
     -> dir_data <- "...": The path to the data directory.
-    -> dir_results <- "...": The path to the results directory
+    -> dir_ukb  <- "...": The path where ukb files are
 
-Once you perform the GWAS with FUMA, you must download the following files to continue with the analysis:
- - All GWAS results in a directory located in ${dir_results/GWAS/} and with the following names: breakthrough_ImputedData_covidSeverity.txt, breakthrough_ImputedData_covidSusceptibility.txt, immuneResponse_ImputedData_one_dose_cohort.txt, immuneResponse_ImputedData_two_dose_cohort.txt
- - SNPs (annotations) files in a directory located in ${dir_results/Mapping/}
+The ukb directory must contain the file "ukb65397.tab", with the following columns:
+     -> f.21001.0.0: Body mass index
+     -> f.26410.0.0: Index of multiple deprivation (England)
+     -> f.26427.0.0: Index of multiple deprivation (Scotland)
+     -> f.26426.0.0: Index of multiple deprivation (Wales)
+     -> f.26411.0.0: Incomde score (England)
+     -> f.26428.0.0: Income score (Scotland)
+     -> f.26418.0.0: Income score (Wales)
+     -> f.26412.0.0: Employment score (England)
+     -> f.26419.0.0: Employment score (Wales)
+     -> f.26413.0.0: Health score (England)
+     -> f.26430.0.0: Health score (Scotland)
+     -> f.26420.0.0: Health score (Wales)
+     -> f.26414.0.0: Education score (England)
+     -> f.26421.0.0: Education score (Wales)
+     -> f.26431.0.0: Education score (Scotland)
+     -> f.26415.0.0: Housing score (England)
+     -> f.26432.0.0: Housing score (Scotland)
+     -> f.26423.0.0: Housing score (Wales)
+     -> f.26416.0.0: Crime score (England)
+     -> f.26434.0.0: Crime score (Scotland)
+
+ 
+Results will be saved into the dir_data directory, within a "Results" folder. For more instructions when runing the analysis, see CodeToRun.R
     
