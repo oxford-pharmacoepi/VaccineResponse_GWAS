@@ -21,6 +21,7 @@ for chr in {1..22}; do
     --covarCol PC4\
     --covarCol PC5\
     --covarCol PC6\
+    --covarCol PC7\
     --covarCol PC8\
     --covarCol PC9\
     --covarCol PC10\
