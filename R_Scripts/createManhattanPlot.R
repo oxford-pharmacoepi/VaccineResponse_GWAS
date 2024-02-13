@@ -49,36 +49,36 @@ for (ii in 1:length(dir)){
     summarize(center=(max(BPcum) + min(BPcum) ) / 2 )
   
   if (ii == 1){
-    plot1<- plot1 + 
-      annotate('text',don %>% filter(LOG10P==max(LOG10P)) %>% select(BPcum) %>% as.numeric(),
-               don %>% summarise(LOG10P=max(LOG10P)) %>% as.numeric()+1, 
-               label = '6:32419074_CT_C', 
-               size = 1.8, color = 'black', hjust=0.5, vjust = 0) +
-      annotate('rect',
-               xmin = don %>% filter(LOG10P==max(LOG10P)) %>% select(BPcum) %>% as.numeric() -1e8,
-               xmax = don %>% filter(LOG10P==max(LOG10P)) %>% select(BPcum) %>% as.numeric() +1e8,
-               ymin = 8.25, ymax = 9.75,
-               alpha = alph, fill = "white")+
-      annotate('text',don %>% filter(LOG10P==max(LOG10P)) %>% select(BPcum) %>% as.numeric(),9,
-               label = 'rs9461694', 
-               size = 1.8, color = 'black', hjust=0.5, vjust = 0.5) +
-      ggtitle(tit[ii]) + theme(plot.title = element_text(size = 7, face = "bold"))
+    # plot1<- plot1 + 
+    #   annotate('text',don %>% filter(LOG10P==max(LOG10P)) %>% select(BPcum) %>% as.numeric(),
+    #            don %>% summarise(LOG10P=max(LOG10P)) %>% as.numeric()+1, 
+    #            label = '6:32419074_CT_C', 
+    #            size = 1.8, color = 'black', hjust=0.5, vjust = 0) +
+    #   annotate('rect',
+    #            xmin = don %>% filter(LOG10P==max(LOG10P)) %>% select(BPcum) %>% as.numeric() -1e8,
+    #            xmax = don %>% filter(LOG10P==max(LOG10P)) %>% select(BPcum) %>% as.numeric() +1e8,
+    #            ymin = 8.25, ymax = 9.75,
+    #            alpha = alph, fill = "white")+
+    #   annotate('text',don %>% filter(LOG10P==max(LOG10P)) %>% select(BPcum) %>% as.numeric(),9,
+    #            label = 'rs9461694', 
+    #            size = 1.8, color = 'black', hjust=0.5, vjust = 0.5) +
+    #   ggtitle(tit[ii]) + theme(plot.title = element_text(size = 7, face = "bold"))
   }else if(ii == 2){
-    plot1 <- plot1 + 
-      annotate('text',don %>% filter(LOG10P==max(LOG10P)) %>% select(BPcum) %>% as.numeric(),
-               don %>% summarise(LOG10P=max(LOG10P)) %>% as.numeric()+.5, 
-               label = 'rs114903158', 
-               size = 1.8, color = 'black', hjust=0.5, vjust = 0) +
-      annotate('rect',
-               xmin = don %>% filter(LOG10P==max(LOG10P)) %>% select(BPcum) %>% as.numeric() -1e8,
-               xmax = don %>% filter(LOG10P==max(LOG10P)) %>% select(BPcum) %>% as.numeric() +1e8,
-               ymin = 7.6, ymax = 8.4,
-               alpha = alph, fill = "white")+
-      annotate('text',don %>% filter(LOG10P==max(LOG10P)) %>% select(BPcum) %>% as.numeric(),
-               8,
-               label = 'rs3094106',
-               size = 1.8, color = 'black', hjust = 0.5, vjust = 0.5) +
-      ggtitle(tit[ii]) + theme(plot.title = element_text(size = 7, face = "bold"))
+    # plot1 <- plot1 + 
+    #   annotate('text',don %>% filter(LOG10P==max(LOG10P)) %>% select(BPcum) %>% as.numeric(),
+    #            don %>% summarise(LOG10P=max(LOG10P)) %>% as.numeric()+.5, 
+    #            label = 'rs114903158', 
+    #            size = 1.8, color = 'black', hjust=0.5, vjust = 0) +
+    #   annotate('rect',
+    #            xmin = don %>% filter(LOG10P==max(LOG10P)) %>% select(BPcum) %>% as.numeric() -1e8,
+    #            xmax = don %>% filter(LOG10P==max(LOG10P)) %>% select(BPcum) %>% as.numeric() +1e8,
+    #            ymin = 7.6, ymax = 8.4,
+    #            alpha = alph, fill = "white")+
+    #   annotate('text',don %>% filter(LOG10P==max(LOG10P)) %>% select(BPcum) %>% as.numeric(),
+    #            8,
+    #            label = 'rs3094106',
+    #            size = 1.8, color = 'black', hjust = 0.5, vjust = 0.5) +
+    #   ggtitle(tit[ii]) + theme(plot.title = element_text(size = 7, face = "bold"))
   }else if(ii == 3){
     plot1 <- plot1 +
       annotate('text',don %>% filter(LOG10P==max(LOG10P) & CHR == 3) %>% select(BPcum) %>% as.numeric(),
