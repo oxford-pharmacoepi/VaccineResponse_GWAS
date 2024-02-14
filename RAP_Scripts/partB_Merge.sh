@@ -6,8 +6,9 @@
 # What this file does:
 # Merge genotype calls
 
-directory="MAH/two_dose" #Path, example: MAH/cohorts
-phenotype="two_dose" #Example: one_dose_cohort
+directory_input="Whole_genome/Breakthrough_gwas"
+directory_output="Whole_genome/Breakthrough_gwas/Merged_files" #Path
+phenotype="oneDose" 
 
 run_merge="cp /mnt/project/Bulk/Genotype\ Results/Genotype\ calls/ukb22418_c[1-9]* . ;\
         ls *.bed | sed -e 's/.bed//g'> files_to_merge.txt;\
@@ -15,6 +16,6 @@ run_merge="cp /mnt/project/Bulk/Genotype\ Results/Genotype\ calls/ukb22418_c[1-9
         --autosome-xy --out ukb22418_c1_22_v2_merged;\
         rm files_to_merge.txt;"
 
-dx run swiss-army-knife -iin="/${directory}/${phenotype}.phe" \
+dx run swiss-army-knife -iin="/${directory_input}/Initial_input_${phenotype}.phe"\
    -icmd="${run_merge}" --tag="Step1" --instance-type "mem1_ssd1_v2_x16"\
-   --destination="/${directory}" --brief --yes --name="StepB_${phenotype}"
+   --destination="/${directory_output}" --brief --yes --name="StepB_${phenotype}"
