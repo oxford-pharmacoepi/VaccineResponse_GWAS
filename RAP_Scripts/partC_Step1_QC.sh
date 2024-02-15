@@ -15,6 +15,6 @@ run_plink_qc="plink2 --bfile ukb22418_c1_22_v2_merged\
 dx run swiss-army-knife -iin="/${directory_input}/Merged_files/ukb22418_c1_22_v2_merged.bed"\
    -iin="/${directory_input}/Merged_files/ukb22418_c1_22_v2_merged.bim"\
    -iin="/${directory_input}/Merged_files/ukb22418_c1_22_v2_merged.fam"\
-   -iin="/${directory_input}/Initial_input_${phenotype}.phe"\
+   -iin="/${directory_input}/Initial_input/Initial_input_${phenotype}.phe"\
    -icmd="${run_plink_qc}" --tag="Step1" --instance-type "mem1_ssd1_v2_x16"\
    --destination="${project}:/${directory_output}/" --brief --yes --name="StepC_${phenotype}"
