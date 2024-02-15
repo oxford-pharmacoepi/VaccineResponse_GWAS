@@ -17,23 +17,14 @@ for chr in {1..21}; do
     --covarCol Sex\
     --covarCol Age\
     --covarCol Genetic_batch\
-    --covarCol PC1\
-    --covarCol PC2\
-    --covarCol PC3\
-    --covarCol PC4\
-    --covarCol PC5\
-    --covarCol PC6\
-    --covarCol PC7\
-    --covarCol PC8\
-    --covarCol PC9\
-    --covarCol PC10\
+    --covarCol PC{1:10}\
     --pred ${phenotype}_results_pred.list --bsize 200\
     --pThresh 0.05 --minMAC 3 --threads 16 --gz"
     
   dx run swiss-army-knife -iin="${imputed_file_dir}/ukb22828_c${chr}_b0_v3.bgen"\
    -iin="${imputed_file_dir}/ukb22828_c${chr}_b0_v3.sample"\
    -iin="/${directory_output}/c${chr}_snps_qc_pass_${phenotype}.snplist"\
-   -iin="/${directory_input}/Initial_input_${phenotype}.phe"\
+   -iin="/${directory_input}/Initial_input/Initial_input_${phenotype}.phe"\
    -iin="/${directory_output}/${phenotype}_results_pred.list"\
    -iin="/${directory_output}/${phenotype}_results_1.loco.gz"\
    -icmd="${run_regenie_cmd}" --tag="Step2" --instance-type "mem1_hdd1_v2_x16"\

@@ -45,7 +45,7 @@ for i in {1..2}; do
 
     dx run swiss-army-knife -iin="${imputed_file_dir}/ukb22828_c${i}_b0_v3.bgen" \
      -iin="${imputed_file_dir}/ukb22828_c${i}_b0_v3.sample" \
-     -iin="/${directory_input}/Initial_input_${phenotype}.phe" \
+     -iin="/${directory_input}/Initial_input/Initial_input_${phenotype}.phe" \
      -icmd="${run_plink_wes}" --tag="Step2" --instance-type "mem1_ssd1_v2_x72"\
      --name "StepE_chr${i}_${phenotype}"\
      --destination="${project}:/${directory_output}/" --brief --yes
