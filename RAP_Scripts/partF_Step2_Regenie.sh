@@ -9,7 +9,7 @@ imputed_file_dir="/Bulk/Imputation/UKB imputation from genotype"
 phenotype="oneDose"
 outcome="immuneResponse"
 
-for chr in {1..21}; do
+for chr in {1..22}; do
   run_regenie_cmd="regenie --step 2 --bgen ukb22828_c${chr}_b0_v3.bgen --sample ukb22828_c${chr}_b0_v3.sample --out ${phenotype}_assoc.c${chr}\
     --phenoFile Initial_input_${phenotype}.phe --covarFile Initial_input_${phenotype}.phe\
     --bt --approx --firth-se --firth --extract c${chr}_snps_qc_pass_${phenotype}.snplist\
