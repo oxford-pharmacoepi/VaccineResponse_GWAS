@@ -7,14 +7,15 @@ phenotype="oneDose"
 outcome="immuneResponse"
 
 for i in {18..22}; do
-    run_plink_wes="plink2 --bgen ukb22828_c${i}_b0_v3.bgen ref-first --sample ukb22828_c${i}_b0_v3.sample\
+    run_plink_wes="plink2 --bgen ukb22828_c${i}_b0_v3.bgen ref-first --sample ukb22828_c${i}_b0_v3.sample --bgi ukb22828_c${i}_b0_v3.bgen.bgi\
       --no-pheno --keep Initial_input_${phenotype}.phe --autosome\
       --maf 0.01 --mac 20 --geno 0.1 --hwe 1e-15 --mind 0.1\
       --write-snplist --write-samples --no-id-header\
-      --rm-dup force-first --out c${i}_snps_qc_pass_${phenotype}"
+      --rm-dup force-first --out c${i}_stepE_${phenotype}"
 
     dx run swiss-army-knife -iin="${imputed_file_dir}/ukb22828_c${i}_b0_v3.bgen" \
      -iin="${imputed_file_dir}/ukb22828_c${i}_b0_v3.sample" \
+     -iin="${imputed_file_dir}/ukb22828_c${i}_b0_v3.bgen.bgi" \
      -iin="/${directory_input}/Initial_input/Initial_input_${phenotype}.phe" \
      -icmd="${run_plink_wes}" --tag="Step2" --instance-type "mem1_ssd1_v2_x16"\
      --name "StepE_chr${i}_${phenotype}"\
@@ -26,7 +27,7 @@ for i in {3..17}; do
       --no-pheno --keep Initial_input_${phenotype}.phe --autosome\
       --maf 0.01 --mac 20 --geno 0.1 --hwe 1e-15 --mind 0.1\
       --write-snplist --write-samples --no-id-header\
-      --rm-dup force-first --out c${i}_snps_qc_pass_${phenotype}"
+      --rm-dup force-first --out c${i}_stepE_${phenotype}"
 
     dx run swiss-army-knife -iin="${imputed_file_dir}/ukb22828_c${i}_b0_v3.bgen" \
      -iin="${imputed_file_dir}/ukb22828_c${i}_b0_v3.sample" \
@@ -41,7 +42,7 @@ for i in {1..2}; do
       --no-pheno --keep Initial_input_${phenotype}.phe --autosome\
       --maf 0.01 --mac 20 --geno 0.1 --hwe 1e-15 --mind 0.1\
       --write-snplist --write-samples --no-id-header\
-      --rm-dup force-first --out c${i}_snps_qc_pass_${phenotype}"
+      --rm-dup force-first --out c${i}_stepE_${phenotype}"
 
     dx run swiss-army-knife -iin="${imputed_file_dir}/ukb22828_c${i}_b0_v3.bgen" \
      -iin="${imputed_file_dir}/ukb22828_c${i}_b0_v3.sample" \

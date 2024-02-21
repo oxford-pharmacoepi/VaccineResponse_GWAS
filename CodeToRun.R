@@ -3,10 +3,27 @@
 #                            Marta Alcalde Herraiz                             #
 # ============================================================================ #
 rm(list = ls())
-pacman::p_load('dplyr','tibble','readr','here',
-               'lubridate','pbatR','forcats','tableone',
-               'qqman','RColorBrewer','ggplot2','gridGraphics','xlsx','stringr',
-               'grid','gridExtra','tidyverse','egg','flextable','ftExtra','officer')
+library("dplyr")
+library("tibble")
+library("readr")
+library("here")
+library("lubridate")
+library("pbatR")
+library("forcats")
+library("tableone")
+library("qqman")
+library("RColorBrewer")
+library("ggplot2")
+library("gridGraphics")
+library("xlsx")
+library("stringr")
+library("grid")
+library("gridExtra")
+library("tidyverse")
+library("egg")
+library("flextable")
+library("ftExtra")
+library("officer")
 
 if(!require("remotes"))
   install.packages("remotes") # if necessary
