@@ -1,7 +1,5 @@
 #!/bin/sh
 
-#output directory - this should also be where the files in 02-step1-qc-filter.sh end up
-
 directory_input="Whole_genome/Breakthrough_gwas"
 directory_output="Whole_genome/Breakthrough_gwas/Intermediary_files"
 phenotype="oneDose"

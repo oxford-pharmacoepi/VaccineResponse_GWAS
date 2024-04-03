@@ -7,7 +7,7 @@
 # Merge genotype calls
 
 directory_input="Whole_genome/Breakthrough_gwas"
-directory_output="Whole_genome/Breakthrough_gwas/Merged_files" #Path
+directory_output="Whole_genome/Breakthrough_gwas/Merged_files" 
 phenotype="oneDose" 
 
 run_merge="cp /mnt/project/Bulk/Genotype\ Results/Genotype\ calls/ukb22418_c[1-9]* . ;\
