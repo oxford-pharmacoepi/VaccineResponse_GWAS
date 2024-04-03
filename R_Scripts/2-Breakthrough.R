@@ -81,7 +81,7 @@ write.table(attr(breakthrough_severity,"cohort_attrition"), paste0(dir_results,'
 
 # write .phe files
 print("load .phe files")
-breakthrough_susceptibility <- as.phe(breakthrough_susceptibility, "FID", "IID")
+breakthrough_susceptibility <- as.phe(breakthrough, "FID", "IID")
 breakthrough_severity       <- as.phe(breakthrough_severity, "FID", "IID")
 
 write.phe(paste0(dir_results,'/Cohorts/breakthrough_susceptibility.phe'), breakthrough_susceptibility)

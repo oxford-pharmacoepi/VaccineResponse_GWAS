@@ -79,7 +79,7 @@ attr(one_vaccine_cohort,"cohort_attrition") <- attr(one_vaccine_cohort,"cohort_a
                    "Reason" = c("cases","controls"),
                    "Excluded" = 0))
 
-write.table(one_vaccine_cohort, paste0(dir_results,'Cohorts/one_dose_original.txt'), row.names = FALSE)
+write.table(one_vaccine_cohort, paste0(dir_results,'Cohorts/one_dose.txt'), row.names = FALSE)
 write.table(attr(one_vaccine_cohort,"cohort_attrition"), paste0(dir_results,'Cohorts/one_dose_attrition.txt'), row.names = FALSE)
 
 # Two dose vaccine cohort ------------------------------------------------------
