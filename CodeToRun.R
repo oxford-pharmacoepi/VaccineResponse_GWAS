@@ -3,16 +3,19 @@
 #                            Marta Alcalde Herraiz                             #
 # ============================================================================ #
 rm(list = ls())
-pacman::p_load('dplyr','tibble','readr','here',
-               'lubridate','pbatR','forcats','tableone',
-               'qqman','RColorBrewer','ggplot2','gridGraphics','xlsx','stringr',
-               'grid','gridExtra','tidyverse','egg','flextable','ftExtra','officer')
-
-if(!require("remotes"))
-  install.packages("remotes") # if necessary
-library(remotes)
-install_github("chr1swallace/coloc@main",build_vignettes=TRUE)
-library(coloc)
+library("dplyr")
+library("readr")
+library("here")
+library("lubridate")
+library("pbatR")
+library("tableone")
+library("ggplot2")
+library("stringr")
+library("tidyverse")
+library("flextable")
+library("ftExtra")
+library("coloc")
+library("tidyverse")
 
 source(here("R_Scripts/Functions.R"))
 
@@ -120,4 +123,9 @@ source(here('R_Scripts','CreateManhattanPlot.R'))
 source(here('R_Scripts','Figure.R'))
 
 
+t <- read.table("C:/Users/martaa/OneDrive - Nexus365/Marta/Projects/Breakthough_infection_GWAS/manuscript_versions/1-first_revision/Results/GWAS/oneDose_assoc.regenie.merged_new.txt", header = TRUE)
+t1 <- read.table("D:/Projects/VaccineResponse_GWAS/Results_old/GWAS/imputedData_oneDose.txt", header = TRUE)
 
+
+cohort_old <- read.table("D:/Projects/VaccineResponse_GWAS/Results_old/Cohorts/imputedData_oneDose.phe", sep = " ", header = TRUE) |> as_tibble()
+cohort_new <- read.table("D:/Projects/VaccineResponse_GWAS/Results/Cohorts/one_dose_original.phe", sep = " ", header = TRUE) |> as_tibble()
