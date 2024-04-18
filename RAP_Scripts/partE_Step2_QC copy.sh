@@ -8,7 +8,6 @@ outcome="bt_infection"
 
 for i in {18..22}; do
     run_plink_wes="plink2 --bgen ukb22828_c${i}_b0_v3.bgen ref-first --sample ukb22828_c${i}_b0_v3.sample\
-      --extract-if-info >= 0.7\
       --no-pheno --keep Initial_input_${phenotype}.phe --autosome\
       --maf 0.01 --mac 20 --geno 0.1 --hwe 1e-15 --mind 0.1\
       --write-snplist --write-samples --no-id-header\
