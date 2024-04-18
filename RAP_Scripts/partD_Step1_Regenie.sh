@@ -2,8 +2,8 @@
 
 directory_input="Whole_genome/Breakthrough_gwas"
 directory_output="Whole_genome/Breakthrough_gwas/Intermediary_files"
-phenotype="oneDose"
-outcome="immuneResponse"
+phenotype="breakthroughSeverity"
+outcome="severity_index"
 
 run_regenie_step1="regenie --step 1\
  --lowmem --out ${phenotype}_results --bed ukb22418_c1_22_v2_merged\

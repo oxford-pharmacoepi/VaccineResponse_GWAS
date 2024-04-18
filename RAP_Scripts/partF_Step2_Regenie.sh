@@ -1,16 +1,14 @@
 #!/bin/bash
 
 
-#change exome_file_dir and data_field for the newest release
-
 directory_input="Whole_genome/Breakthrough_gwas"
 directory_output="Whole_genome/Breakthrough_gwas/Intermediary_files"
 imputed_file_dir="/Bulk/Imputation/UKB imputation from genotype"
-phenotype="oneDose"
-outcome="immuneResponse"
+phenotype="breakthroughSusceptibility"
+outcome="bt_infection"
 
 for chr in {1..22}; do
-  run_regenie_cmd="regenie --step 2 --bgen ukb22828_c${chr}_b0_v3.bgen --sample ukb22828_c${chr}_b0_v3.sample --bgi ukb22828_c${chr}_b0_v3.bgen.bgi --out ${phenotype}_assoc.c${chr}\
+  run_regenie_cmd="regenie --step 2 --bgen ukb22828_c${chr}_b0_v3.bgen --sample ukb22828_c${chr}_b0_v3.sample --out ${phenotype}_assoc.c${chr}\
     --phenoFile Initial_input_${phenotype}.phe --covarFile Initial_input_${phenotype}.phe\
     --bt --approx --firth-se --firth --extract c${chr}_stepE_${phenotype}.snplist\
     --phenoCol ${outcome}\
@@ -23,7 +21,6 @@ for chr in {1..22}; do
     
   dx run swiss-army-knife -iin="${imputed_file_dir}/ukb22828_c${chr}_b0_v3.bgen"\
    -iin="${imputed_file_dir}/ukb22828_c${chr}_b0_v3.sample"\
-   -iin="${imputed_file_dir}/ukb22828_c${chr}_b0_v3.bgen.bgi"\
    -iin="/${directory_output}/c${chr}_stepE_${phenotype}.snplist"\
    -iin="/${directory_input}/Initial_input/Initial_input_${phenotype}.phe"\
    -iin="/${directory_output}/${phenotype}_results_pred.list"\

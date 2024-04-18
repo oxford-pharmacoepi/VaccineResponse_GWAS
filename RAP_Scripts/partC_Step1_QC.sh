@@ -4,7 +4,7 @@
 
 directory_input="Whole_genome/Breakthrough_gwas"
 directory_output="Whole_genome/Breakthrough_gwas/Intermediary_files"
-phenotype="oneDose"
+phenotype="breakthroughSeverity"
 
 run_plink_qc="plink2 --bfile ukb22418_c1_22_v2_merged\
  --keep Initial_input_${phenotype}.phe --autosome\
