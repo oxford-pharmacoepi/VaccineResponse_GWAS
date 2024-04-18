@@ -72,8 +72,8 @@ for(i in 1:nrow(genRisk)){
   n[i,4] <- c4$summary[1]
 }
 
-genRisk |>
-  select("Phenotype" = "phenotype", "SNP" = "rsID", "CHR" = "chr", "POS" = "pos") |>
+coloc <- genRisk |>
+  select("Phenotype",  "SNP" = "rsID", "CHR" = "chr", "POS" = "pos") |>
   mutate(Phenotype = case_when(
     Phenotype == "oneDose" ~ "Immune response - One dose",
     Phenotype == "twoDose" ~ "Immune response - Two dose",
