@@ -28,7 +28,12 @@ breakthrough <- vaccination_data |>
       filter(result == 1) |>
       group_by(eid) |>
       filter(specdate == min(specdate)) |>
-      select("eid", "specdate", "result", "origin"),
+      select("eid", "specdate", "result", "origin") |>
+      distinct() |> 
+      group_by(eid) |>
+      mutate(origin = max(origin)) |> 
+      ungroup() |>
+      distinct(),
     by = "eid"
   ) |>
   mutate(date_first_dose = date_first_dose + 15) |>
