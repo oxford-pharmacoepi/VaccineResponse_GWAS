@@ -33,61 +33,16 @@ source(here('R_Scripts','2-Breakthrough.R'))
 
 # Run the GWAS in the RAP PLATFORM ---------------------------------------------
 dir.create(paste0(dir_results,'GWAS'))
+source(here("R_Scripts","3-ComputePVal.R"))
+
 # Save the results within the "GWAS" folder under the names:
 # imputedData_breakthroughSeverity.txt
 # imputedData_breakthroughSeverity_Validation.txt
 
+
 # Run FUMA ---------------------------------------------------------------------
-# Run FUMA with the following specifications:
-# Note: You may need to convert to .gz files the GWAS
-# [INPUT FILES]
-# - chrcol = CHROM
-# - poscol = GENPOS
-# - rsIDcol = ID
-# - pcol = P
-# - eacol = ALLELE1
-# - neacol = ALLELE0
-# - orcol = NA
-# - becol = BETA
-# - secol = SE
-# - leadSNPsfile = NA
-# - addleadSNPs = 1
-# - regionsfile = NA
-# [PARAMETERS]
-# - GRCh38 = 0
-# - N = NA
-# - Ncol = N
-# - exMHC = 0
-# - MHCopt = NA
-# - extMHC = NA
-# - ensembl = v102
-# - genetype = protein_coding
-# - leadP = 5e-8
-# - gwasP = 0.05
-# - r2 = 0.6
-# - r2_2 = 0.1
-# - refpanel = 1KG/Phase3
-# - pop = EUR
-# - MAF = 0
-# - refSNPs = 1
-# - mergeDist = 250
-# [MAGMA]
-# - magma = 0
-# [posMap]
-# - posMap = 1
-# - posMapWindowSize = 10
-# - posMapAnnot = NA
-# - posMapCADDth = 0
-# - posMapRDBth = NA
-# - posMapChr15 = NA
-# - posMapChr15Max = NA
-# - posMapChr15Meth = NA
-# - posMapAnnoDs = NA
-# - posMapAnnoMeth = NA
-# [eqtlMap]
-# - eqtlMap = 0
-# [ciMap]
-# - ciMap = 0
+# FUMA Specifications can be find in the 
+
 
 dir.create(paste0(dir_results,'FUMA'))
 dir.create(paste0(dir_results,'FUMA/oneDose'))

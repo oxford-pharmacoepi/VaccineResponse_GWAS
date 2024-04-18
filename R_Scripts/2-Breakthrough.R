@@ -49,8 +49,8 @@ breakthrough <- vaccination_data |>
   recordAttrition(reason = "participants with the same sex and genetic sex registered") |>
   filter(is.na(sex_chromosome_aneuploidy)) %>%
   recordAttrition(reason = "participants with no sex chromosome aneuploidy") |>
-  filter(kinship_to_other_participants == 0) |>
-  recordAttrition(reason = "no kinship to other participants") |>
+  # filter(kinship_to_other_participants == 0) |>
+  # recordAttrition(reason = "no kinship to other participants") |>
   mutate(Age = year(date_first_dose) - Year_of_birth) |>
   mutate(result = if_else(is.na(result), 0, result),
          origin = if_else(is.na(origin), 0, origin)) |>
@@ -70,9 +70,9 @@ breakthrough_severity <- breakthrough |>
   filter(bt_infection == 1) |>
   recordAttrition("Restrict to cases (infected)") |>
   select(FID, IID, severity_index, Sex, Age, Genetic_batch, starts_with("PC")) |>
-  relocate('FID', 'IID') 
+  relocate('FID', 'IID')
 
-attr(breakthrough_severity,"cohort_attrition") <- attr(breakthrough_severity,"cohort_attrition") |>
+attr(breakthrough_severity,"cohort_attrition") <- attr(breakthrough,"cohort_attrition") |>
   union_all(tibble("N" = c(breakthrough_severity |> filter(severity_index == 1) |> tally() |> pull(),
                            breakthrough_severity |> filter(severity_index == 0) |> tally() |> pull()),
                    "Reason" = c("cases","controls"),

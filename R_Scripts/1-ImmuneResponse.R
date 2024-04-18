@@ -22,7 +22,6 @@ ukb_covid <- as_tibble(loadImmuneResponseData()) |>
          Date_antibody_test_performed    = as.Date(Date_antibody_test_performed,"%Y-%m-%d"),
          Year_antibody_test_performed    = year(Date_antibody_test_performed))
 
-
 ukb_covar <- as_tibble(loadCovariates())
 
 # Attrition --------------------------------------------------------------------
@@ -42,8 +41,8 @@ vaccine_cohort <- ukb_covid |>
   recordAttrition(reason = "participants with the same sex and genetic sex registered") |>
   filter(is.na(sex_chromosome_aneuploidy)) %>%
   recordAttrition(reason = "participants with no sex chromosome aneuploidy") |>
-  filter(kinship_to_other_participants == 0) |>
-  recordAttrition(reason = "no kinship to other participants") |>
+  # filter(kinship_to_other_participants == 0) |>
+  # recordAttrition(reason = "no kinship to other participants") |>
   filter(Received_first_COVID19_vaccination == 1) %>%
   recordAttrition(reason = "participants that have received at least one dose of a COVID-19 vaccine") |>
   filter(Year_first_COVID19_vaccination >= 2021) |>
@@ -59,9 +58,9 @@ one_vaccine_cohort <- vaccine_cohort |>
   filter(Received_second_COVID19_vaccination == 0) |>
   recordAttrition(reason = "participants have not received a second covid-19 vaccine dose") |> 
   mutate(Days_since_vaccine = as.numeric(difftime(Date_antibody_test_performed,Date_first_COVID19_vaccination, units = "days"))) %>% 
-  # filter(Days_since_vaccine >= 8,
-  #        Days_since_vaccine <= 56) |>
-  filter(Days_since_vaccine > 0, Days_since_vaccine <= 84) |>
+  filter(Days_since_vaccine >= 8,
+         Days_since_vaccine <= 56) |>
+  # filter(Days_since_vaccine > 0, Days_since_vaccine <= 84) |>
   recordAttrition(reason = "participants have received the first COVID-19 vaccine between 7 and 56 days before the antibody test") |> 
   mutate(Age_antibody_test_performed = Year_antibody_test_performed - Year_of_birth) |>
   mutate('FID' = eid, 'IID' = eid) |>
