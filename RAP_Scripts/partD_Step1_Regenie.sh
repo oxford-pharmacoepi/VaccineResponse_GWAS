@@ -6,7 +6,7 @@ phenotype="breakthroughSeverity"
 outcome="severity_index"
 
 run_regenie_step1="regenie --step 1\
- --lowmem --out ${phenotype}_results --bed ukb22418_c1_22_v2_merged\
+ --lowmem --out StepD-${phenotype}_results --bed ukb22418_c1_22_v2_merged\
  --phenoFile Initial_input_${phenotype}.phe --covarFile Initial_input_${phenotype}.phe\
  --extract snps_qc_pass_${phenotype}.snplist --phenoCol ${outcome}\
  --covarCol Sex\

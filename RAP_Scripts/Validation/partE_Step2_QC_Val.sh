@@ -1,11 +1,14 @@
 #!/bin/bash
 
-imputed_file_dir="/Auxiliary_genetic_dataset/Imputation"
-directory="MAH/one_dose_validation" #Output directory, example: MAH/cohorts
-phenotype="one_dose_validation" #Example: one_dose_cohort
+directory_input="Whole_genome/Breakthrough_gwas"
+directory_output="Whole_genome/Breakthrough_gwas/Intermediary_files"
+imputed_file_dir="/Bulk/Imputation/UKB imputation from genotype"
+phenotype="breakthroughSusceptibility"
+outcome="bt_infection"
 
-for chr in 6; do
-        run_plink_wes="plink2 --bfile selected_snps_${phenotype}_${chr}\
+
+for chr in {1,2,3,6,10,19; do
+        run_plink_wes="plink2 --bfile StepE-selected_snps_${phenotype}_${chr}\
             --no-pheno\
             --keep ${phenotype}.phe\
             --autosome\

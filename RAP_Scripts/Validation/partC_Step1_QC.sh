@@ -9,7 +9,7 @@ run_plink_qc="plink2 --bfile ukb22418_c1_22_v2_merged\
  --keep Initial_input_${phenotype}.phe --autosome\
  --maf 0.01 --mac 20 --geno 0.1 --hwe 1e-15\
  --mind 0.1 --write-snplist --write-samples\
- --no-id-header --out  snps_qc_pass_${phenotype}"
+ --no-id-header --out  StepC-snps_qc_pass_${phenotype}"
 
 dx run swiss-army-knife -iin="/${directory_input}/Merged_files/ukb22418_c1_22_v2_merged.bed"\
    -iin="/${directory_input}/Merged_files/ukb22418_c1_22_v2_merged.bim"\
