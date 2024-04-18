@@ -14,6 +14,7 @@ library("tidyverse")
 library("flextable")
 library("ftExtra")
 library("coloc")
+library("readr")
 library("tidyverse")
 
 source(here("R_Scripts/Functions.R"))
@@ -31,9 +32,8 @@ source(here('R_Scripts','2-Breakthrough.R'))
 source(here("R_Scripts","3-ComputePVal.R"))
 
 # Save the results within the "GWAS" folder under the names:
-# imputedData_breakthroughSeverity.txt
-# imputedData_breakthroughSeverity_Validation.txt
-
+# breakthroughSeverity.txt
+# breakthroughSeverity_Validation.txt
 
 # Run FUMA ---------------------------------------------------------------------
 
@@ -41,6 +41,7 @@ source(here("R_Scripts","3-ComputePVal.R"))
 source(here("R_Scripts","4-Colocalization.R"))
 
 # Validation -------------------------------------------------------------------
+source(here("R_Scripts","5-Validation.R"))
 
 # SCRIPTS TO MAKE THE TABLES/FIGURES FROM THE PAPER ----------------------------
 dir.create(paste0(dir_results,'Validation'))
