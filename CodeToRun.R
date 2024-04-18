@@ -4,7 +4,6 @@
 # ============================================================================ #
 rm(list = ls())
 library("dplyr")
-library("readr")
 library("here")
 library("lubridate")
 library("pbatR")
@@ -24,15 +23,11 @@ dir_data    <- 'D:/Projects/VaccineResponse_GWAS/'
 dir_ukb     <- 'D:/Projects/UKBiobank_65397/'
 dir_results <- 'D:/Projects/VaccineResponse_GWAS/Results/'
 
-# Create directories
-dir.create(paste0(dir_results,'Cohorts'))
-
 # Load codes
 source(here('R_Scripts','1-ImmuneResponse.R'))
 source(here('R_Scripts','2-Breakthrough.R'))
 
 # Run the GWAS in the RAP PLATFORM ---------------------------------------------
-dir.create(paste0(dir_results,'GWAS'))
 source(here("R_Scripts","3-ComputePVal.R"))
 
 # Save the results within the "GWAS" folder under the names:
@@ -41,29 +36,11 @@ source(here("R_Scripts","3-ComputePVal.R"))
 
 
 # Run FUMA ---------------------------------------------------------------------
-# FUMA Specifications can be find in the 
 
+# Colocalisation analysis ------------------------------------------------------
+source(here("R_Scripts","4-Colocalization.R"))
 
-dir.create(paste0(dir_results,'FUMA'))
-dir.create(paste0(dir_results,'FUMA/oneDose'))
-dir.create(paste0(dir_results,'FUMA/twoDose'))
-dir.create(paste0(dir_results,'FUMA/breakthroughSusceptibility'))
-dir.create(paste0(dir_results,'FUMA/breakthroughSeverity'))
-# Save the results within each folder. Files you may have to download include:
-# - GenomicRisk.Loci.txt
-# - leadSNPs.txt
-# - IndSigSNPs.txt
-# - annov.txt
-# - annov.stats.txt
-# - gwascatalog.txt
-# - params.config
-# - README.txt for more detailed information
-
-# Colocalisation analysis: 
-dir.create(paste0(dir_results,'Tables'))
-dir.create(paste0(dir_results,'Figures'))
-source(here("R_Scripts","3-Colocalization.R"))
-source(here("R_Scripts","Colocalisation.R"))
+# Validation -------------------------------------------------------------------
 
 # SCRIPTS TO MAKE THE TABLES/FIGURES FROM THE PAPER ----------------------------
 dir.create(paste0(dir_results,'Validation'))

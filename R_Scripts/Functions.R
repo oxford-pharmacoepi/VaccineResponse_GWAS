@@ -64,3 +64,18 @@ loadCovidEnglandVaccination <- function(){
     mutate(specdate = lubridate::dmy(specdate)) 
   
 }
+
+getColocFormat <- function(gwas,genRisk,i,w){
+  gwas1 <- gwas %>%
+    filter(GENPOS >= genRisk$pos[i]-w-1 & GENPOS <= genRisk$pos[i]+w+1 & CHROM == genRisk$chr[i])
+  
+  d <- list(
+    beta = gwas1$BETA,
+    varbeta = gwas1$SE^2,
+    type = 'cc',
+    snp  = gwas1$ID,
+    position = gwas1$GENPOS
+  )
+  
+  return(d)
+}
