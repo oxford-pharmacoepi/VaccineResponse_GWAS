@@ -12,13 +12,13 @@ getManhattanPlot <- function(gwas,
   
   gwas1 <- gwas_top %>% full_join(gwas_low) 
   
-  # Manhattan plot ---------------------------------------------------------------
+  # Manhattan plot -------
   don <- gwas1 %>%
     # Compute chromosome size
     group_by(CHR) %>%
     summarise(chr_len = max(BP)) %>%
     # Calculate cumulative position of each chromosome
-    mutate(tot = cumsum(chr_len)-chr_len) %>%
+    mutate(tot = cumsum(as.numeric(chr_len))-chr_len) %>%
     select(-chr_len) %>%
     # Add this info to the initial dataset
     left_join(gwas1, ., by = c("CHR" ="CHR")) %>%
@@ -32,7 +32,7 @@ getManhattanPlot <- function(gwas,
   plot1 <- ggplot(don, aes(x=BPcum, y=LOG10P)) +
     # Show all points
     geom_point(aes(color=as.factor(CHR)), size = dot_size) +
-    scale_color_manual(values = rep(colors,chr_len)) +
+    scale_color_manual(values = rep(colors, chr_len)) +
     # custom X axis:
     scale_x_continuous(label = axisdf$CHR, breaks = axisdf$center, expand = c(0.015,0.015)) +
     scale_y_continuous(expand = c(0, 0), breaks = seq(0,y_lim,2)) +     # remove space between plot area and x axis

@@ -43,7 +43,7 @@ breakthrough <- vaccination_data |>
     ukb_covariates,
     by = "eid"
   ) |> 
-  filter(is.na(Caucasian)) |>
+  filter(Caucasian == 1) |>
   recordAttrition(reason = "participants with European ancestry") |>
   filter(Sex == genetic_sex) |>
   recordAttrition(reason = "participants with the same sex and genetic sex registered") |>
@@ -174,7 +174,7 @@ attr(breakthrough_severity,"cohort_attrition") <- attr(breakthrough,"cohort_attr
 write.table(breakthrough, paste0(dir_results,'/Cohorts/breakthrough_susceptibility_validation.txt'), row.names = FALSE)
 write.table(attr(breakthrough,"cohort_attrition"), paste0(dir_results,'/Cohorts/breakthrough_susceptibility_validation_attrition.txt'), row.names = FALSE)
 
-write.table(breakthrough_severity, paste0(dir_results,'/Cohorts/breakthrough_severity.txt'), row.names = FALSE)
+write.table(breakthrough_severity, paste0(dir_results,'/Cohorts/breakthrough_severity_validation.txt'), row.names = FALSE)
 write.table(attr(breakthrough_severity,"cohort_attrition"), paste0(dir_results,'/Cohorts/breakthrough_severity_validation_attrition.txt'), row.names = FALSE)
 
 # write .phe files

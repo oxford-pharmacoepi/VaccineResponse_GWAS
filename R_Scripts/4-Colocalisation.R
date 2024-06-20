@@ -33,7 +33,7 @@ for(i in 1:4){
     ) |>
     distinct()
   
-  gwasList[[i]] <- read.delim(paste0(dir_results,'GWAS/',ch[i],'.txt'),sep = " ") |> as_tibble()
+  gwasList[[i]] <- read.delim(paste0(dir_results,'GWAS/',ch[i],'_assoc.regenie.merged.txt'),sep = "\t") |> as_tibble()
 }
 
 w <- 250e3
@@ -41,10 +41,10 @@ n <- matrix(0,nrow(genRisk),4)
 c <- matrix(0,nrow(genRisk),4)
 
 for(i in 1:nrow(genRisk)){
-  d1 <- getColocFormat(gwasList[[1]],genRisk, i, w)
-  d2 <- getColocFormat(gwasList[[2]],genRisk, i, w)
-  d3 <- getColocFormat(gwasList[[3]],genRisk, i, w)
-  d4 <- getColocFormat(gwasList[[4]],genRisk, i, w)
+  d1 <- getColocFormat(gwasList[[1]], genRisk, i, w)
+  d2 <- getColocFormat(gwasList[[2]], genRisk, i, w)
+  d3 <- getColocFormat(gwasList[[3]], genRisk, i, w)
+  d4 <- getColocFormat(gwasList[[4]], genRisk, i, w)
   
   if(genRisk[i,]$Phenotype == "oneDose"){
     d <- d1
@@ -73,7 +73,7 @@ for(i in 1:nrow(genRisk)){
 }
 
 coloc <- genRisk |>
-  select("Phenotype",  "SNP" = "rsID", "CHR" = "chr", "POS" = "pos") |>
+  select("Phenotype", "SNP" = "rsID", "CHR" = "chr", "POS" = "pos") |>
   mutate(Phenotype = case_when(
     Phenotype == "oneDose" ~ "Immune response - One dose",
     Phenotype == "twoDose" ~ "Immune response - Two dose",
@@ -131,7 +131,7 @@ save_as_docx(coloc, path = paste0(dir_results,'Tables/Colocalisation.docx'))
 #   filter(GENPOS >= genRisk$pos[1]-w-1 & GENPOS <= genRisk$pos[1]+w+1 & CHROM == genRisk$chr[1]) %>%
 #   mutate(f = if_else(ID == "rs681343",1,0)) %>%
 #   arrange(f)
-#   
+# 
 # library(extrafont)
 # font_import()
 # windowsFonts("Calibri" = windowsFont("Calibri"))
@@ -145,7 +145,7 @@ save_as_docx(coloc, path = paste0(dir_results,'Tables/Colocalisation.docx'))
 #   scale_y_continuous(breaks = seq(0,6,1), limits = c(0,6.2), expand = c(0,0)) +     # remove space between plot area and x axis
 #   # # Custom the theme:
 #   theme_bw() +
-#   theme( 
+#   theme(
 #     legend.position="none",
 #     # panel.border = element_blank(),
 #     panel.grid.major.x = element_blank(),
@@ -163,7 +163,7 @@ save_as_docx(coloc, path = paste0(dir_results,'Tables/Colocalisation.docx'))
 #   #Plot a red horizontal line at 5e-8
 #   geom_hline(yintercept = -log10(5e-8), linewidth = 0.3) +
 #   labs(x = 'Chromosome 19 [BP]', y = expression(-log[10](P))) +
-#   ggtitle('(A) Immune response - one dose') 
+#   ggtitle('(A) Immune response - one dose')
 # 
 # gplot3 <- ggplot(gwas3, aes(x = GENPOS, y = LOG10P)) +
 #   # Show all points
@@ -173,7 +173,7 @@ save_as_docx(coloc, path = paste0(dir_results,'Tables/Colocalisation.docx'))
 #   scale_y_continuous(breaks = seq(0,50,2), limits = c(0,50.2), expand = c(0,0)) +     # remove space between plot area and x axis
 #   # # Custom the theme:
 #   theme_bw() +
-#   theme( 
+#   theme(
 #     legend.position="none",
 #     # panel.border = element_blank(),
 #     panel.grid.major.x = element_blank(),
@@ -190,7 +190,7 @@ save_as_docx(coloc, path = paste0(dir_results,'Tables/Colocalisation.docx'))
 #   ) +
 #   #Plot a red horizontal line at 5e-8
 #   labs(x = 'Chromosome 19 [BP]', y = expression(-log[10](P))) +
-#   ggtitle('(B) Breakthrough susceptibility') 
+#   ggtitle('(B) Breakthrough susceptibility')
 # 
 # ggsave('mh_1.png', plot = gplot1, path = paste0(dir_results,'Figures/mh_1.png'), height = 6.7, width = 22.4, units = 'cm',dpi = 300)
 # ggsave('mh_3.png', plot = gplot3, path = paste0(dir_results,'Figures/mh_3.png'), height = 6.7, width = 22.4, units = 'cm',dpi = 300)

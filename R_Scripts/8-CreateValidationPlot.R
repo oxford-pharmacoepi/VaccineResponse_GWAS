@@ -34,8 +34,7 @@ getOrder <- function(genomicRL){
 
 
 for(i in 1:4){
-  
-  genomicRL <- read_delim(paste0(dir_results,'FUMA/',ch[i],'/GenomicRiskLoci.txt'))
+  genomicRL <- read_delim(paste0(dir_results,'GWAS/FUMA_',ch[i],'/GenomicRiskLoci.txt'))
   
   if(i == 1){
     order <- getOrder(genomicRL)
@@ -61,7 +60,6 @@ plots <- list()
 gwas <- gwas %>% 
   mutate(Vali = if_else(sign(Validation_OR-1) == sign(Main.analysis_OR-1),1,0)) %>%
   mutate(Vali = if_else(sign(Validation_OR-1) == sign(Main.analysis_OR-1) & Validation_P.Value <= 0.05,2,Vali))
-
 
 for(i in c(1:length(nam))){
   tab <- gwas %>% filter(Phenotype == nam[i]) %>%
@@ -116,7 +114,7 @@ for(i in c(1:length(nam))){
       expand = c(0,0),
       limits = c(0.5,nrow(tab)/2+.5)
     ) +
-    scale_y_log10(breaks = c(0.5,0.75,1,1.25,1.5), limits = c(0.45, 1.65), expand = c(0,0)) +
+    scale_y_log10(breaks = c(0.5,0.75,1,1.25,1.5, 1.75), limits = c(0.45, 1.85), expand = c(0,0)) +
     labs(y = 'Odds Ratio')+
     coord_flip()
   }else{
@@ -135,7 +133,7 @@ for(i in c(1:length(nam))){
         expand = c(0,0),
         limits = c(0.5,nrow(tab)/2+.5)
       ) +
-      scale_y_log10(breaks = c(0.5,0.75,1,1.25,1.5), limits = c(0.45, 1.65), expand = c(0,0)) +
+      scale_y_log10(breaks = c(0.5,0.75,1,1.25,1.75), limits = c(0.45, 1.85), expand = c(0,0)) +
       coord_flip()
   }
 
@@ -182,22 +180,23 @@ legq2 <- ggplot(leg2, aes(or, y)) +
 
 aux <- ggplot() + theme_void() + ylim(-9,45) + xlim(-1.2,1) +
   annotation_custom(ggplotGrob(legq1), # Legend
-                    ymin = 40, ymax = 45.75,
+                    ymin = 40, ymax = 48,
                     xmin = -.7, xmax = 1) +
   annotation_custom(ggplotGrob(legq2),
-                    ymin = 40.5, ymax = 43.5,
+                    ymin = 40.5, ymax = 46.75,
                     xmin = -.7, xmax = 1) +
   annotation_custom(ggplotGrob(plots[[1]]), # One dose
-                    ymin = 15.85, ymax = 42.5,
-                    xmin = -.893,xmax = +1) +
+                    ymin = 26.9, ymax = 45.5,
+                    xmin = -.75,xmax = +1) +
   annotation_custom(ggplotGrob(plots[[2]]), # Two doses
-                    ymin = 11, ymax = 17,
-                    xmin = -.767,xmax = +1) +
-  annotation_custom(ggplotGrob(plots[[3]]),
-                    ymin = -6.95, ymax = 12.15,
+                    ymin = 16.15, ymax = 27.5,
+                    xmin = -.7325,xmax = +1) +
+  annotation_custom(ggplotGrob(plots[[3]]), # Breakthrough susceptibility
+                    ymin = -8.6, ymax = 16.75,
                     xmin = -.75, xmax = 1) +
   annotation_custom(ggplotGrob(plots[[4]]), # Breakthrough severity
-                    ymin = -10.75, ymax = -5.8,
-                    xmin = -.75, xmax = 1)
+                    ymin = -11.5, ymax = -8,
+                    xmin = -.695, xmax = 1)
 
-ggsave(paste0(dir_results,'Figures/Validation.png'), plot = aux, width = 25, height = 36, dpi = 600, units = 'cm')
+ggsave(paste0(dir_results,'Figures/Validation.png'), plot = aux, width = 25, height = 55, dpi = 600, units = 'cm')
+

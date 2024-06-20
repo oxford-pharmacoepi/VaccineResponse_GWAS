@@ -67,7 +67,8 @@ loadCovidEnglandVaccination <- function(){
 
 getColocFormat <- function(gwas,genRisk,i,w){
   gwas1 <- gwas %>%
-    filter(GENPOS >= genRisk$pos[i]-w-1 & GENPOS <= genRisk$pos[i]+w+1 & CHROM == genRisk$chr[i])
+    filter(CHROM == genRisk$chr[i]) %>%
+    filter(GENPOS >= genRisk$pos[i]-w-1 & GENPOS <= genRisk$pos[i]+w+1)
   
   d <- list(
     beta = gwas1$BETA,
@@ -78,4 +79,27 @@ getColocFormat <- function(gwas,genRisk,i,w){
   )
   
   return(d)
+}
+
+loadUKBTableOne <- function(){
+  
+  bd <- as_tibble(read.table(paste0(dir_data,"UKBiobank/tableOne.tab"), header=TRUE, sep="\t")) |>
+    rename("eid" = "f.eid",
+           "sex" = "f.31.0.0",
+           "year_of_birth" = "f.34.0.0",
+           "ethnic_background" = "f.21000.0.0",
+           "body_mass_index" = "f.21001.0.0") |>
+    mutate("index_of_multiple_deprivation" = if_else(is.na(f.26410.0.0), f.26427.0.0, f.26410.0.0)) |>
+    mutate("index_of_multiple_deprivation" = if_else(is.na(index_of_multiple_deprivation), f.26426.0.0, index_of_multiple_deprivation)) |>
+    inner_join(
+      as_tibble(read.table(paste0(dir_data,"UKBiobank/ethnic_background_coding.tsv"), header = TRUE, sep = "\t")) |>
+      select("ethnic_background" = "coding", "meaning"),
+      by = "ethnic_background"
+    ) |>
+    select(-c("ethnic_background")) |>
+    rename("ethnic_background" = "meaning") |>
+    select(-starts_with("f."))
+    
+  return(bd)
+    
 }

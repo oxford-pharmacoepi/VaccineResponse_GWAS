@@ -18,111 +18,140 @@ getOrder <- function(genomicRL){
   return(order)
 }
 
-ch  <- c('oneDose', 
-         'twoDose',
-         'breakthroughSusceptibility',
-         'breakthroughSeverity')
-nam <- c('Immune response - One dose',
-         'Immune response - Two dose',
-         'Breakthrough susceptibility',
-         'Breakthrough severity')
-nam1 <- c('Immune response_One dose',
-         'Immune response_Two dose',
-         'Breakthrough_Susceptibility',
-         'Breakthrough_Severity')
-
-
+ch  <- c('oneDose', 'twoDose', 'breakthroughSusceptibility','breakthroughSeverity')
+ch1 <- c('one_dose', "two_dose", "breakthrough_susceptibility", "breakthrough_severity")
+nam <- c('Immune response - One dose', 'Immune response - Two dose', 
+         'Breakthrough susceptibility', 'Breakthrough severity')
+nam1 <- c('Immune response_One dose', 'Immune response_Two doses',
+         'Breakthrough_Susceptibility','Breakthrough_Severity')
 
 # Table 1 ======================================================================
-ukb <- tibble(read_delim(paste0(dir_ukb,'ukb65397.tab'))) %>%
-  rename(eid = f.eid) %>%
-  mutate(`f.26410.0.0` = if_else(is.na(`f.26410.0.0`),`f.26427.0.0`,`f.26410.0.0`)) %>%
-  mutate(`f.26410.0.0` = if_else(is.na(`f.26410.0.0`),`f.26426.0.0`,`f.26410.0.0`)) %>%
-  mutate(`f.26411.0.0` = if_else(is.na(`f.26411.0.0`),`f.26428.0.0`,`f.26411.0.0`)) %>%
-  mutate(`f.26411.0.0` = if_else(is.na(`f.26411.0.0`),`f.26418.0.0`,`f.26411.0.0`)) %>%
-  # mutate(`f.26412.0.0` = if_else(is.na(`f.26412.0.0`),`f.26429.0.0`,`f.26412.0.0`)) %>%
-  mutate(`f.26412.0.0` = if_else(is.na(`f.26412.0.0`),`f.26419.0.0`,`f.26412.0.0`)) %>%
-  mutate(`f.26413.0.0` = if_else(is.na(`f.26413.0.0`),`f.26430.0.0`,`f.26413.0.0`)) %>%
-  mutate(`f.26413.0.0` = if_else(is.na(`f.26413.0.0`),`f.26420.0.0`,`f.26413.0.0`)) %>%
-  mutate(`f.26414.0.0` = if_else(is.na(`f.26414.0.0`),`f.26421.0.0`,`f.26414.0.0`)) %>% 
-  mutate(`f.26414.0.0` = if_else(is.na(`f.26414.0.0`),`f.26431.0.0`,`f.26414.0.0`)) %>% 
-  mutate(`f.26415.0.0` = if_else(is.na(`f.26415.0.0`),`f.26432.0.0`,`f.26415.0.0`)) %>%  
-  mutate(`f.26415.0.0` = if_else(is.na(`f.26415.0.0`),`f.26423.0.0`,`f.26415.0.0`)) %>%  
-  mutate(`f.26416.0.0` = if_else(is.na(`f.26416.0.0`),`f.26434.0.0`,`f.26416.0.0`))
+outcome_name <- c("immuneResponse","immuneResponse","bt_infection","severity_index")
+ukb_tableOne <- loadUKBTableOne() 
 
-to  <- list()
+tableOne <- list()
+
 for(i in 1:4){
-  coh <- tibble(read_delim(paste0(dir_results,'Cohorts/imputedData_',ch[i],'.csv'))) %>%
-    select("eid" = "IID", 'Sex','Age') %>% 
-    left_join(ukb %>%
-                select('eid',
-                       'Body mass index' = 'f.21001.0.0',
-                       'Index of multiple deprivation' = 'f.26410.0.0',
-                       'Income score' = 'f.26411.0.0',
-                       'Employment score' = 'f.26412.0.0',
-                       'Health score' = 'f.26413.0.0',
-                       'Education score' = 'f.26414.0.0',
-                       'Housing score' = 'f.26415.0.0',
-                       'Crime score' = 'f.26416.0.0',
-                       'Living environment score' = 'f.26417.0.0'
-                ),
-              by = "eid") %>%
-    mutate(Sex = if_else(Sex == 0,'Female','Male')) %>%
-    mutate('Sex' = as.factor(Sex))
+  cohort <- as_tibble(read.table(paste0(dir_results,"Cohorts/", ch1[i], ".txt"), header = TRUE)) |>
+    select("eid" = "FID", "Sex", "Age", "outcome" = outcome_name[i])  |>
+    inner_join(ukb_tableOne, by = "eid") |>
+    mutate(Sex = if_else(Sex == 0, "Female", "Male")) |>
+    select(-c("sex", "year_of_birth")) |>
+    mutate(outcome = as.factor(outcome)) |>
+    rename("Body mass index" = "body_mass_index",
+           "Index of multiple deprivation" = "index_of_multiple_deprivation",
+           "Ethnic background" = "ethnic_background")
   
-  to[[i]] <- CreateTableOne(data = coh, 
-                            vars = colnames(coh[2:length(colnames(coh))])) %>%
-    print(showAllLevels = TRUE)
+  tableOne[[ch[i]]] <- CreateTableOne(data = cohort,
+                              vars = colnames(cohort[2:length(colnames(cohort))])) |>
+    print(showAllLevels = TRUE) 
 }
 
-tab <- tibble(data.frame(to[[1]])) %>%
-  rename("Immune response_One dose" = 'Overall') %>%
-  mutate(Variables = rownames(to[[1]])) %>%
-  relocate('Variables') %>%
+tab <- tibble(data.frame(tableOne[[ch[1]]])) |>
+  rename("Immune response_One dose" = 'Overall') |>
+  mutate(Variables = rownames(tableOne[[ch[1]]])) |>
+  relocate('Variables') |>
   left_join(
-    tibble(data.frame(to[[2]])) %>%
-      rename("Immune response_Two dose" = 'Overall') %>%
-      mutate(Variables = rownames(to[[2]])),
-    by = c('Variables','level'))%>%
+    tibble(data.frame(tableOne[[ch[2]]])) |>
+      rename("Immune response_Two doses" = 'Overall') |>
+      mutate(Variables = rownames(tableOne[[ch[2]]])) |>
+      relocate('Variables'),
+    by = c('Variables','level')) |>
   left_join(
-    tibble(data.frame(to[[3]])) %>%
-      rename("Breakthrough_Susceptibility" = 'Overall') %>%
-      mutate(Variables = rownames(to[[3]])),
+    tibble(data.frame(tableOne[[ch[3]]])) |>
+      rename("Breakthrough_Susceptibility" = 'Overall') |>
+      mutate(Variables = rownames(tableOne[[ch[3]]])) |>
+      relocate('Variables'),
     by = c('Variables','level')) %>%
   left_join(
-    tibble(data.frame(to[[4]])) %>%
-      rename("Breakthrough_Severity" = 'Overall') %>%
-      mutate(Variables = rownames(to[[4]])),
-      by = c('Variables','level')) %>%
-  rename(' ' = 'level') %>%
-  flextable() %>%
-  span_header(sep = "_") %>%
+    tibble(data.frame(tableOne[[ch[4]]])) |>
+      rename("Breakthrough_Severity" = 'Overall') |>
+      mutate(Variables = rownames(tableOne[[ch[4]]])) |>
+      relocate('Variables'),
+      by = c('Variables','level')) |>
+  rename(' ' = 'level') |>
+  flextable() |>
+  span_header(sep = "_") |>
   align(j = c(3:5), align = 'center', part = 'all')
-save_as_docx(tab, path = paste0(dir_results,'Tables/T1.docx'))
+
+save_as_docx(tab, path = paste0(dir_results,'Tables/TableOne.docx'))
+
+
+# Table 1 - VALIDATION =========================================================
+outcome_name <- c("immuneResponse","immuneResponse","bt_infection","severity_index")
+ukb_tableOne <- loadUKBTableOne() 
+
+tableOne <- list()
+
+for(i in 1:4){
+  cohort <- as_tibble(read.table(paste0(dir_results,"Cohorts/", ch1[i], "_validation.txt"), header = TRUE)) |>
+    select("eid" = "FID", "Sex", "Age", "outcome" = outcome_name[i])  |>
+    inner_join(ukb_tableOne, by = "eid") |>
+    mutate(Sex = if_else(Sex == 0, "Female", "Male")) |>
+    select(-c("sex", "year_of_birth")) |>
+    mutate(outcome = as.factor(outcome)) |>
+    rename("Body mass index" = "body_mass_index",
+           "Index of multiple deprivation" = "index_of_multiple_deprivation",
+           "Ethnic background" = "ethnic_background")
+  
+  tableOne[[ch[i]]] <- CreateTableOne(data = cohort,
+                                      vars = colnames(cohort[2:length(colnames(cohort))])) |>
+    print(showAllLevels = TRUE) 
+}
+
+
+tab <- tibble(data.frame(tableOne[[ch[1]]])) |>
+  rename("Immune response_One dose" = 'Overall') |>
+  mutate(Variables = rownames(tableOne[[ch[1]]])) |>
+  relocate('Variables') |>
+  left_join(
+    tibble(data.frame(tableOne[[ch[2]]])) |>
+      rename("Immune response_Two doses" = 'Overall') |>
+      mutate(Variables = rownames(tableOne[[ch[2]]])) |>
+      relocate('Variables'),
+    by = c('Variables','level')) |>
+  left_join(
+    tibble(data.frame(tableOne[[ch[3]]])) |>
+      rename("Breakthrough_Susceptibility" = 'Overall') |>
+      mutate(Variables = rownames(tableOne[[ch[3]]])) |>
+      relocate('Variables'),
+    by = c('Variables','level')) %>%
+  left_join(
+    tibble(data.frame(tableOne[[ch[4]]])) |>
+      rename("Breakthrough_Severity" = 'Overall') |>
+      mutate(Variables = rownames(tableOne[[ch[4]]])) |>
+      relocate('Variables'),
+    by = c('Variables','level')) |>
+  rename(' ' = 'level') |>
+  flextable() |>
+  span_header(sep = "_") |>
+  align(j = c(3:5), align = 'center', part = 'all')
+
+save_as_docx(tab, path = paste0(dir_results,'Tables/TableOne_validation.docx'))
 
 # Table SNPs ===================================================================
 tableList_SNPs <- list()
 
 for(i in 1:4){
-  gwas        <- read_delim(paste0(dir_results,'GWAS/imputedData_',ch[i],'.txt')) %>% 
-    mutate(P  = 10^(-LOG10P),
-           OR = exp(BETA))
-  leadSnps    <- read_delim(paste0(dir_results,'FUMA/',ch[i],'/leadSNPs.txt'))
-  annovar     <- read_delim(paste0(dir_results,'FUMA/',ch[i],'/annov.txt'))
-  gwascatalog <- read_delim(paste0(dir_results,'FUMA/',ch[i],'/gwascatalog.txt'))
-  genomicRL   <- read_delim(paste0(dir_results,'FUMA/',ch[i],'/GenomicRiskLoci.txt'))
-
+  gwas <- as_tibble(read.table(paste0(dir_results,"GWAS/",ch[i],".txt"), header = TRUE)) |>
+    mutate(OR = exp(BETA))
+  
+  leadSnps    <- read_delim(paste0(dir_results,'GWAS/FUMA_',ch[i],'/leadSNPs.txt'))
+  annovar     <- read_delim(paste0(dir_results,'GWAS/FUMA_',ch[i],'/annov.txt'))
+  gwascatalog <- read_delim(paste0(dir_results,'GWAS/FUMA_',ch[i],'/gwascatalog.txt'))
+  genomicRL   <- read_delim(paste0(dir_results,'GWAS/FUMA_',ch[i],'/GenomicRiskLoci.txt'))
+  
   order <- getOrder(genomicRL = genomicRL)
   
-  t <- order %>%
-    left_join(leadSnps %>%
+  t <- order |>
+    left_join(leadSnps |>
                 select('uniqID',
                        'CHR' = 'chr',
                        'BP'  = 'pos',
                        'SNP' = 'rsID'),
-              by = 'SNP') %>%
-    #mutate('Trait' = nam[i]) %>%
-    left_join(gwas %>%
+              by = 'SNP') |>
+    mutate('Phenotype' = nam[i]) %>%
+    left_join(gwas |>
                 select('CHR' = 'CHROM',
                        'BP'  = 'GENPOS',
                        'SNP' = 'ID',
@@ -131,30 +160,87 @@ for(i in 1:4){
                        'OA'  = 'ALLELE0',
                        'OR'  = 'OR',
                        'SE'  = 'SE',
-                       'PVAL' = 'P'),
-              by = c('CHR','BP','SNP')) %>%
-    left_join(annovar %>% 
-                group_by(uniqID, 'Function' = annot) %>% 
-                summarise('Gene' = paste0(symbol, collapse=" - "), 
-                          'Distance (b)' = paste0(dist, collapse=" - ")) %>%
+                       'PVAL' = 'PVAL'),
+              by = c('CHR','BP','SNP')) |>
+    left_join(annovar |>
+                group_by(uniqID, 'Function' = annot) |>
+                summarise('Gene' = paste0(symbol, collapse=" - "))|>
                 ungroup(),
-              by = "uniqID") %>%
-    left_join(
-      gwascatalog %>% rename("SNP" = "IndSigSNP") %>%
-        select('SNP', 'Trait') %>%
-        distinct() %>%
-        group_by(SNP) %>%
-        summarise('Previous reported trait' = paste0(Trait, collapse = ", ")),
-      by = 'SNP') %>%
-    mutate(`Previous reported trait` = if_else(is.na(`Previous reported trait`), '-',`Previous reported trait`))
+              by = "uniqID") 
   
-  tableList_SNPs[[i]] <- t %>% 
-    select(-uniqID) %>%
+  tableList_SNPs[[i]] <- t |>
+    select(-uniqID) |>
     mutate('EAF' = round(EAF, digits=2),
            'OR'  = round(OR,  digits=2),
            'SE'  = round(SE,  digits=2),
-           'PVAL' = formatC(PVAL, format = "e", digits = 1)) %>% 
-    flextable() %>%
+           'PVAL' = formatC(PVAL, format = "e", digits = 1)) |> 
+    select("Phenotype", "SNP", "CHR", "BP",  "EA", "OA","EAF","OR", "SE","PVAL",
+           "Function", "Gene/Nearest genes" = "Gene") |>
+    flextable() |>
+    bg(i = 1, bg = "#EFEFEF", part = "head") %>%
+    bold(bold = TRUE, part="header") %>%
+    align(align = 'center', part = "all") %>%
+    width(j = c('CHR','EAF','EA','OA','OR','SE'), width = 1.2, unit = 'cm') %>%
+    width(j = c('SNP','BP','PVAL'), width = 1.7, unit = 'cm') %>%
+    width(j = c('Function','Gene/Nearest genes'), width = 2, unit = 'cm') %>%
+    hline(part = "body")
+}
+
+# Table SNPs (extra info) ------
+tableList_SNPs_extra <- list()
+
+for(i in 1:4){
+  gwas <- as_tibble(read.table(paste0(dir_results,"GWAS/",ch[i],".txt"), header = TRUE)) |>
+    mutate(OR = exp(BETA))
+  
+  leadSnps    <- read_delim(paste0(dir_results,'GWAS/FUMA_',ch[i],'/leadSNPs.txt'))
+  annovar     <- read_delim(paste0(dir_results,'GWAS/FUMA_',ch[i],'/annov.txt'))
+  gwascatalog <- read_delim(paste0(dir_results,'GWAS/FUMA_',ch[i],'/gwascatalog.txt'))
+  genomicRL   <- read_delim(paste0(dir_results,'GWAS/FUMA_',ch[i],'/GenomicRiskLoci.txt'))
+
+  order <- getOrder(genomicRL = genomicRL)
+  
+  t <- order |>
+    left_join(leadSnps |>
+                select('uniqID',
+                       'CHR' = 'chr',
+                       'BP'  = 'pos',
+                       'SNP' = 'rsID'),
+              by = 'SNP') |>
+    #mutate('Trait' = nam[i]) %>%
+    left_join(gwas |>
+                select('CHR' = 'CHROM',
+                       'BP'  = 'GENPOS',
+                       'SNP' = 'ID',
+                       'EAF' = 'A1FREQ',
+                       'EA'  = 'ALLELE1',
+                       'OA'  = 'ALLELE0',
+                       'OR'  = 'OR',
+                       'SE'  = 'SE',
+                       'PVAL' = 'PVAL'),
+              by = c('CHR','BP','SNP')) |>
+    left_join(annovar |>
+                group_by(uniqID, 'Function' = annot) |>
+                summarise('Gene' = paste0(symbol, collapse=" - "), 
+                          'Distance (b)' = paste0(dist, collapse=" - "))|>
+                ungroup(),
+              by = "uniqID") |>
+    left_join(
+      gwascatalog |> rename("SNP" = "IndSigSNP") |>
+        select('SNP', 'Trait') |>
+        distinct() |>
+        group_by(SNP) |>
+        summarise('Previous reported trait' = paste0(Trait, collapse = ", ")),
+      by = 'SNP') |>
+    mutate(`Previous reported trait` = if_else(is.na(`Previous reported trait`), '-',`Previous reported trait`))
+  
+  tableList_SNPs_extra[[i]] <- t |>
+    select(-uniqID) |>
+    mutate('EAF' = round(EAF, digits=2),
+           'OR'  = round(OR,  digits=2),
+           'SE'  = round(SE,  digits=2),
+           'PVAL' = formatC(PVAL, format = "e", digits = 1)) |> 
+    flextable() |>
     bg(i = 1, bg = "#EFEFEF", part = "head") %>%
     bold(bold = TRUE, part="header") %>%
     align(align = 'center', part = "all") %>%
@@ -164,20 +250,18 @@ for(i in 1:4){
     width(j = c('Function','Gene','Distance (b)'), width = 2, unit = 'cm') %>%
     width(j = c('Previous reported trait'), width = 5, unit = 'cm') %>%
     hline(part = "body")
-  
 }
 
-
-# Table 2 - Validation ---------------------------------------------------------
+# Table Validation -------------------------------------------------------------
 tableListValidation <- list()
 for(i in 1:4){
-  genomicRL   <- read_delim(paste0(dir_results,'FUMA/',ch[i],'/GenomicRiskLoci.txt'))
+  genomicRL <- read_delim(paste0(dir_results,'GWAS/FUMA_',ch[i],'/GenomicRiskLoci.txt'))
   order <- getOrder(genomicRL)
-  gwas_validation <- read_delim(paste0(dir_results,'GWAS/imputedData_',ch[i],'_Validation.txt'))
+  gwas_validation <- read_delim(paste0(dir_results,'Validation/',ch[i],'_validation.txt'))
   
   t <- order %>% rename('ID' = 'SNP') %>%
     left_join(gwas_validation,
-              by = 'ID') %>% 
+              by = 'ID') %>%  filter(ID == "rs3760775")
     mutate(OR = round(exp(BETA), digits = 2)) %>%
     mutate('P Value' = formatC(10^{-LOG10P}, format = "e", digit = 1),
            'Lower'   = exp(BETA-1.96*SE),
@@ -186,7 +270,7 @@ for(i in 1:4){
            'Validation_Lower' = 'Lower', 'Validation_Upper' = 'Upper') %>%
     mutate(Phenotype = nam[i]) %>%
     left_join(
-      read_delim(paste0(dir_results,'GWAS/imputedData_',ch[i],'.txt')) %>%
+      read_delim(paste0(dir_results,'GWAS/',ch[i],'.txt')) %>%
         mutate('Main analysis_N' = N) %>%
         mutate('Main analysis_OR' = round(exp(BETA), digits = 2)) %>%
         mutate('Main analysis_P Value' = formatC(10^{-LOG10P}, format = "e", digit = 1)) %>%
@@ -204,7 +288,6 @@ gwas <- tableListValidation[[1]] %>%
   add_row(tableListValidation[[2]]) %>%
   add_row(tableListValidation[[3]]) %>%
   add_row(tableListValidation[[4]])
-
 write.table(gwas,paste0(dir_results,'/Validation/Validation.txt'))
 
 tableList_Validation <- gwas %>%
@@ -222,16 +305,16 @@ tableList_Validation <- gwas %>%
   color(i = ~ as.numeric(`Validation_P Value`) < 0.05, j = c('ID','Main analysis_N','Main analysis_OR','Main analysis_P Value',
                                                              'Validation_N','Validation_OR','Validation_P Value'), color = 'red') %>%
   hline(i=c(14,16,25))
-  
+
 
 # Table comparator ==============================================================
 gwasList  <- list()
 genomicRL <- data.frame(Phenotype = NA, CHR = NA, SNP = NA, uniqID = NA, Function = NA, Gene = NA)
 annovarList <- list()
 for (i in 1:4){
-  aux <- getOrder(genomicRL = read_delim(paste0(dir_results,'FUMA/',ch[i],'/GenomicRiskLoci.txt'))) %>% 
-    left_join(read_delim(paste0(dir_results,'FUMA/',ch[i],'/leadSNPs.txt')) %>% select(SNP = rsID, uniqID, CHR = chr), by = c('SNP')) %>%
-    left_join(read_delim(paste0(dir_results,'FUMA/',ch[i],'/annov.txt'))    %>% 
+  aux <- getOrder(genomicRL = read_delim(paste0(dir_results,'GWAS/FUMA_',ch[i],'/GenomicRiskLoci.txt'))) %>% 
+    left_join(read_delim(paste0(dir_results,'GWAS/FUMA_',ch[i],'/leadSNPs.txt')) %>% select(SNP = rsID, uniqID, CHR = chr), by = c('SNP')) %>%
+    left_join(read_delim(paste0(dir_results,'GWAS/FUMA_',ch[i],'/annov.txt'))    %>% 
                 group_by(uniqID, 'Function' = annot) %>%
                 summarise('Gene' = paste0(symbol, collapse = " - ")) %>% 
                 ungroup(),
@@ -240,9 +323,8 @@ for (i in 1:4){
   
   genomicRL <- genomicRL %>% add_row(aux)
   
-  gwasList[[i]] <- read_delim(paste0(dir_results,'GWAS/imputedData_',ch[i],'.txt')) %>% 
-    mutate(P  = 10^(-LOG10P),
-           OR = exp(BETA))
+  gwasList[[i]] <- read_delim(paste0(dir_results,'GWAS/',ch[i],'_assoc.regenie.merged.txt')) %>% 
+    mutate(OR = exp(BETA))
 }
 
 t <- genomicRL %>% 
@@ -262,9 +344,9 @@ t <- genomicRL %>%
                      SE = round(SE, digits = 2),
                      P  = formatC(10^{-LOG10P}, format = "e", digit = 1)) %>%
               select('Lead SNP' = 'ID',
-                     'Immune response_Two dose_OR' = OR,
-                     'Immune response_Two dose_SE' = SE,
-                     'Immune response_Two dose_P Value' = P),
+                     'Immune response_Two doses_OR' = OR,
+                     'Immune response_Two doses_SE' = SE,
+                     'Immune response_Two doses_P Value' = P),
             by = 'Lead SNP') %>%
   left_join(gwasList[[3]] %>%
               mutate(OR = round(OR, digits = 2),
@@ -284,6 +366,7 @@ t <- genomicRL %>%
                      'Breakthrough_Severity_SE' = SE,
                      'Breakthrough_Severity_P Value' = P),
             by = 'Lead SNP')
+
 tableList_Comparator <- t %>% 
   select(-"uniqID", -"Function") %>%
   flextable() %>%
@@ -310,15 +393,15 @@ tableList_Comparator <- t %>%
   width(j = 1, width = 1, unit = "in") %>%
   bold(bold = TRUE, part="header") %>%
   width(j = "Immune response_One dose_OR", width = 1.2, unit = 'cm') %>%
-  width(j = "Immune response_Two dose_OR", width = 1.2, unit = 'cm') %>%
+  width(j = "Immune response_Two doses_OR", width = 1.2, unit = 'cm') %>%
   width(j = "Breakthrough_Susceptibility_OR", width = 1.2, unit = 'cm') %>%
   width(j = "Breakthrough_Severity_OR", width = 1.2, unit = 'cm') %>%
   width(j = "Immune response_One dose_SE", width = 1.2, unit = 'cm') %>%
-  width(j = "Immune response_Two dose_SE", width = 1.2, unit = 'cm') %>%
+  width(j = "Immune response_Two doses_SE", width = 1.2, unit = 'cm') %>%
   width(j = "Breakthrough_Susceptibility_SE", width = 1.2, unit = 'cm') %>%
   width(j = "Breakthrough_Severity_SE", width = 1.2, unit = 'cm') %>%
   width(j = "Immune response_One dose_P Value", width = 1.6, unit = 'cm') %>%
-  width(j = "Immune response_Two dose_P Value", width = 1.6, unit = 'cm') %>%
+  width(j = "Immune response_Two doses_P Value", width = 1.6, unit = 'cm') %>%
   width(j = "Breakthrough_Susceptibility_P Value", width = 1.6, unit = 'cm') %>%
   width(j = "Breakthrough_Severity_P Value", width = 1.6, unit = 'cm') %>%
   width(j = "Lead SNP", width = 2.7, unit = 'cm') %>%
@@ -333,6 +416,10 @@ tList <- list(tableList_SNPs[[1]],
               tableList_SNPs[[2]],
               tableList_SNPs[[3]],
               tableList_SNPs[[4]],
+              tableList_SNPs_extra[[1]],
+              tableList_SNPs_extra[[2]],
+              tableList_SNPs_extra[[3]],
+              tableList_SNPs_extra[[4]],
               tableList_Validation, 
               tableList_Comparator)
 save_as_docx(values = tList, path = paste0(dir_results,'Tables/AllTables.docx'))

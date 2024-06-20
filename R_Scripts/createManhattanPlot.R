@@ -1,10 +1,8 @@
-
-
 dir <- c('imputedData_oneDose',
          'imputedData_twoDose',
          'imputedData_breakthroughSusceptibility',
          'imputedData_breakthroughSeverity')
-tit <- c('A) Immune response - One dose', 'B) Immune response - Two dose',
+tit <- c('A) Immune response - One dose', 'B) Immune response - Two doses',
          'C) Breakthrough susceptibility', 'D) Breakthrough severity')
 ylim_MH <- c(30,18,56,24)
 ylim_QQ <- c(14,14,14,14)
