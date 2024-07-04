@@ -4,7 +4,7 @@ dir <- c('oneDose',
          'breakthroughSusceptibility',
          'breakthroughSeverity')
 
-tit <- c('A) Immune response - One dose', 'B) Immune response - Two doses',
+tit <- c('A) Seroconversion - One dose', 'B) Seroconversion - Two doses',
          'C) Breakthrough susceptibility', 'D) Breakthrough severity')
 
 ylim_MH <- c(30,22,70,19)
@@ -15,7 +15,7 @@ y_QQ_max <- c(34,25,80,21.75)
 alph     <- 0.7
 #colors <- c('#79A7A5','#A3C6BC','#CEE5D4')
 
-for (ii in 4){#:length(dir)){
+for (ii in 1:length(dir)){
   gwas <-  as_tibble(read.table(paste0(dir_results,"GWAS/",dir[ii],"_assoc.regenie.merged.txt"), header = TRUE)) |>
     mutate(P = 10^(-LOG10P))  %>%
     select(CHR = CHROM, BP = GENPOS, SNP = ID, LOG10P, P) %>%
@@ -176,7 +176,7 @@ for (ii in 4){#:length(dir)){
                                  xmax = don %>% filter(BPcum == max(BPcum)) %>% reframe(BPcum) %>% as.numeric()
                                  ) 
 
-  ggsave(paste0(dir_results,'Figures/',dir[ii],'.png'), plot = p, width = 165, height = 54, dpi = 300, units = 'mm')
+  ggsave(paste0(dir_results,'Figures/',dir[ii],'.png'), plot = p, width = 80, height = 54, dpi = 300, units = 'mm')
 }
 
 
