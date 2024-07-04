@@ -64,7 +64,10 @@ one_vaccine_cohort <- vaccine_cohort |>
   recordAttrition(reason = "participants have received the first COVID-19 vaccine between 7 and 56 days before the antibody test") |> 
   mutate(Age_antibody_test_performed = Year_antibody_test_performed - Year_of_birth) |>
   mutate('FID' = eid, 'IID' = eid) |>
-  relocate('FID', 'IID') |>
+  relocate('FID', 'IID')
+write.table(one_vaccine_cohort, paste0(dir_results, "Cohorts/one_dose_crude.txt"), row.names = FALSE)
+
+one_vaccine_cohort <- one_vaccine_cohort |>
   select(FID, IID, 
          immuneResponse = Antibody_test_result, 
          Sex, 
@@ -92,7 +95,10 @@ two_vaccine_cohort <- vaccine_cohort |>
   filter(Days_since_vaccine <= 56 & Days_since_vaccine >= 8) %>%
   recordAttrition(reason = "participants have received the second vaccine dose between 8 and 56 days before antibody test") |> 
   mutate(Age_antibody_test_performed = Year_antibody_test_performed - Year_of_birth) %>%
-  mutate('FID' = eid, 'IID' = eid) %>% relocate('FID', 'IID') %>%
+  mutate('FID' = eid, 'IID' = eid) %>% relocate('FID', 'IID')
+write.table(two_vaccine_cohort, paste0(dir_results, "Cohorts/two_dose_crude.txt"), row.names = FALSE)
+
+two_vaccine_cohort <- two_vaccine_cohort |>
   select(FID, IID, 
          immuneResponse = Antibody_test_result, 
          Sex, 
@@ -116,6 +122,7 @@ two_dose_cohort <- as.phe(two_vaccine_cohort, "FID", "IID")
 
 write.phe(paste0(dir_results,'/Cohorts/one_dose.phe'), one_dose_cohort)
 write.phe(paste0(dir_results,'/Cohorts/two_dose.phe'), two_dose_cohort)
+
 # ============================================================================ #
 #                                   Validation                                 #
 # ============================================================================ #

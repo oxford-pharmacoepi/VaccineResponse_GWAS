@@ -20,9 +20,9 @@ getOrder <- function(genomicRL){
 
 ch  <- c('oneDose', 'twoDose', 'breakthroughSusceptibility','breakthroughSeverity')
 ch1 <- c('one_dose', "two_dose", "breakthrough_susceptibility", "breakthrough_severity")
-nam <- c('Immune response - One dose', 'Immune response - Two dose', 
+nam <- c('Seroconversion - One dose', 'Seroconversion - Two dose', 
          'Breakthrough susceptibility', 'Breakthrough severity')
-nam1 <- c('Immune response_One dose', 'Immune response_Two doses',
+nam1 <- c('Seroconversion_One dose', 'Seroconversion_Two doses',
          'Breakthrough_Susceptibility','Breakthrough_Severity')
 
 # Table 1 ======================================================================
@@ -134,7 +134,7 @@ tableList_SNPs <- list()
 
 for(i in 1:4){
   gwas <- as_tibble(read.table(paste0(dir_results,"GWAS/",ch[i],".txt"), header = TRUE)) |>
-    mutate(OR = exp(BETA))
+    mutate(OR = exp(BETA), PVAL = 10^(-LOG10P))
   
   leadSnps    <- read_delim(paste0(dir_results,'GWAS/FUMA_',ch[i],'/leadSNPs.txt'))
   annovar     <- read_delim(paste0(dir_results,'GWAS/FUMA_',ch[i],'/annov.txt'))
@@ -164,7 +164,7 @@ for(i in 1:4){
               by = c('CHR','BP','SNP')) |>
     left_join(annovar |>
                 group_by(uniqID, 'Function' = annot) |>
-                summarise('Gene' = paste0(symbol, collapse=" - "))|>
+                summarise('Gene' = paste0(symbol, collapse=" - ")) |>
                 ungroup(),
               by = "uniqID") 
   
@@ -191,7 +191,7 @@ tableList_SNPs_extra <- list()
 
 for(i in 1:4){
   gwas <- as_tibble(read.table(paste0(dir_results,"GWAS/",ch[i],".txt"), header = TRUE)) |>
-    mutate(OR = exp(BETA))
+    mutate(OR = exp(BETA), PVAL = 10^(-LOG10P))
   
   leadSnps    <- read_delim(paste0(dir_results,'GWAS/FUMA_',ch[i],'/leadSNPs.txt'))
   annovar     <- read_delim(paste0(dir_results,'GWAS/FUMA_',ch[i],'/annov.txt'))
@@ -261,24 +261,28 @@ for(i in 1:4){
   
   t <- order %>% rename('ID' = 'SNP') %>%
     left_join(gwas_validation,
-              by = 'ID') %>%  filter(ID == "rs3760775")
+              by = 'ID') %>%  
     mutate(OR = round(exp(BETA), digits = 2)) %>%
     mutate('P Value' = formatC(10^{-LOG10P}, format = "e", digit = 1),
            'Lower'   = exp(BETA-1.96*SE),
-           'Upper'   = exp(BETA+1.96*SE)) %>%
-    select(CHROM, ID, 'Validation_N' = 'N', 'Validation_OR' = 'OR', 'Validation_P Value' = 'P Value',
+           'Upper'   = exp(BETA+1.96*SE),
+           "EAF"     = round(A1FREQ,2)) %>%
+    select(CHROM, ID, 'Validation_N' = 'N', "EA" = "ALLELE1", 
+           "Validation_OR" = 'OR', "Validation_EAF" = "EAF", 
+           'Validation_P Value' = 'P Value',
            'Validation_Lower' = 'Lower', 'Validation_Upper' = 'Upper') %>%
     mutate(Phenotype = nam[i]) %>%
     left_join(
       read_delim(paste0(dir_results,'GWAS/',ch[i],'.txt')) %>%
         mutate('Main analysis_N' = N) %>%
+        mutate("EAF" = round(A1FREQ,2)) %>%
         mutate('Main analysis_OR' = round(exp(BETA), digits = 2)) %>%
         mutate('Main analysis_P Value' = formatC(10^{-LOG10P}, format = "e", digit = 1)) %>%
         mutate('Main analysis_Lower' = exp(BETA-1.96*SE)) %>%
         mutate('Main analysis_Upper' = exp(BETA+1.96*SE)) %>%
-        select(ID, 'Main analysis_N', 'Main analysis_OR', 'Main analysis_P Value',
-               'Main analysis_Lower', 'Main analysis_Upper'),
-      by = 'ID'
+        select(ID, 'Main analysis_N',  "EA" = "ALLELE1",  'Main analysis_OR', "Main analysis_EAF" = "EAF", 
+               'Main analysis_P Value', 'Main analysis_Lower', 'Main analysis_Upper'),
+      by = c('ID',"EA")
     )
   
   tableListValidation[[i]] <- t
@@ -292,19 +296,21 @@ write.table(gwas,paste0(dir_results,'/Validation/Validation.txt'))
 
 tableList_Validation <- gwas %>%
   select(-CHROM,-`Main analysis_Lower`,-`Main analysis_Upper`,-`Validation_Upper`,-`Validation_Lower`) %>%
-  relocate('Main analysis_N', .after = 'ID') %>%
-  relocate('Main analysis_OR', .after = 'Main analysis_N') %>%
-  relocate('Main analysis_P Value', .after = 'Main analysis_OR') %>%
-  relocate('Phenotype', .before = 'ID') %>%
+  select("Phenotype", "SNP" = "ID", "EA", 
+         "Main analysis_N", "Main analysis_EAF", "Main analysis_OR", "Main analysis_P Value",
+         "Validation_N", "Validation_EAF", "Validation_OR", "Validation_P Value") %>%
   flextable() %>%
   span_header(sep = "_") %>%
   align(align = 'center', part = 'all') %>%
   bg(j = c('Main analysis_N',
-           'Main analysis_P Value',
-           'Validation_OR'), bg = "#EFEFEF", part = "all")  %>%
-  color(i = ~ as.numeric(`Validation_P Value`) < 0.05, j = c('ID','Main analysis_N','Main analysis_OR','Main analysis_P Value',
-                                                             'Validation_N','Validation_OR','Validation_P Value'), color = 'red') %>%
-  hline(i=c(14,16,25))
+           'Main analysis_OR',
+           'Validation_N', "Validation_OR"), bg = "#EFEFEF", part = "all")  %>%
+  bg(i = 1, j = c(8:11), bg = "white", part = "header") %>%
+  vline(j = c(3,7)) %>%
+  color(i = ~ as.numeric(`Validation_P Value`) < 0.05, j = c('SNP', "EA",'Main analysis_N', 'Main analysis_EAF','Main analysis_OR','Main analysis_P Value',
+                                                             'Validation_N','Validation_EAF','Validation_OR','Validation_P Value'), color = 'red') %>%
+  hline(i=c(13,20,38)) %>%
+  bold(i = c(1,2), part = "header")
 
 
 # Table comparator ==============================================================

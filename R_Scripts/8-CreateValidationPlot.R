@@ -7,8 +7,8 @@ ch  <- c('oneDose',
          'twoDose',
          'breakthroughSusceptibility',
          'breakthroughSeverity')
-nam <- c('Immune response - One dose',
-         'Immune response - Two dose',
+nam <- c('Seroconversion - One dose',
+         'Seroconversion - Two dose',
          'Breakthrough susceptibility',
          'Breakthrough severity')
 
@@ -34,16 +34,37 @@ getOrder <- function(genomicRL){
 
 
 for(i in 1:4){
-  genomicRL <- read_delim(paste0(dir_results,'GWAS/FUMA_',ch[i],'/GenomicRiskLoci.txt'))
+  
+  leadSnps    <- read_delim(paste0(dir_results,'GWAS/FUMA_',ch[i],'/leadSNPs.txt'))
+  annovar     <- read_delim(paste0(dir_results,'GWAS/FUMA_',ch[i],'/annov.txt'))
+  genomicRL   <- read_delim(paste0(dir_results,'GWAS/FUMA_',ch[i],'/GenomicRiskLoci.txt'))
+  
+  genomicRL <- getOrder(genomicRL = genomicRL) |>
+    inner_join(genomicRL |> select(SNP = rsID), by = "SNP") %>%
+    left_join(leadSnps |>
+                select('uniqID',
+                       'CHR' = 'chr',
+                       'BP'  = 'pos',
+                       'SNP' = 'rsID'),
+              by = 'SNP') |>
+    mutate('Phenotype' = nam[i]) %>%
+    left_join(annovar |>
+                group_by(uniqID) |>
+                summarise('symbol' = paste0(symbol, collapse=" - ")) |>
+                ungroup(),
+              by = "uniqID")  |>
+    select(rsID = SNP, symbol)
+  
   
   if(i == 1){
-    order <- getOrder(genomicRL)
+    order <- genomicRL
   }else{
-    order <- order %>% union_all(getOrder(genomicRL))
-  }
+    order <- order %>%
+      rbind(genomicRL)
+    }
 }
 
-order <- data.frame('SNP' = rev(order$SNP))
+order <- data.frame('SNP' = rev(order$rsID), "symbol" = rev(order$symbol))
 gwas <- order %>% rename(ID = SNP) %>%
   left_join(
     read.table(paste0(dir_results,'Validation/Validation.txt')),
@@ -63,7 +84,7 @@ gwas <- gwas %>%
 
 for(i in c(1:length(nam))){
   tab <- gwas %>% filter(Phenotype == nam[i]) %>%
-    select(c('CHROM','ID','Phenotype','Vali') | contains('Validation')) %>%
+    select(c('CHROM','ID','Phenotype','Vali', "symbol") | contains('Validation')) %>%
     mutate(Type = 'Validation') %>%
     rename('N' = 'Validation_N',
            'OR' = 'Validation_OR',
@@ -73,7 +94,7 @@ for(i in c(1:length(nam))){
   tab <- tab %>%
     mutate(order = 1:nrow(tab)) %>%
     full_join(gwas %>% filter(Phenotype == nam[i]) %>%
-                select(c('CHROM','ID','Phenotype','Vali') | contains('Main.analysis')) %>%
+                select(c('CHROM','ID','Phenotype','Vali',"symbol") | contains('Main.analysis')) %>%
                 mutate(Type = 'Main') %>%
                 rename('N' = 'Main.analysis_N',
                        'OR' = 'Main.analysis_OR',
@@ -82,7 +103,9 @@ for(i in c(1:length(nam))){
                        'Upper' = 'Main.analysis_Upper') %>%
                 mutate(order = 1:nrow(tab))) %>%
     mutate(Type = factor(Type, levels = c('Validation','Main'))) %>%
-    mutate(Vali = factor(Vali, levels = c('0','1','2')))
+    mutate(Vali = factor(Vali, levels = c('0','1','2'))) %>%
+    ungroup() %>%
+    select("Phenotype", "ID", "symbol", "order", "Type", "Lower", "Upper", "Vali", "OR")
 
 
   plots[[i]] <- ggplot(tab, aes(x = order,y = OR)) +
@@ -112,7 +135,10 @@ for(i in c(1:length(nam))){
       breaks = tab$order,
       labels = tab$ID,
       expand = c(0,0),
-      limits = c(0.5,nrow(tab)/2+.5)
+      limits = c(0.5,nrow(tab)/2+.5),
+      sec.axis = sec_axis(~.,
+                          breaks = tab$order,
+                          labels = tab$symbol)
     ) +
     scale_y_log10(breaks = c(0.5,0.75,1,1.25,1.5, 1.75), limits = c(0.45, 1.85), expand = c(0,0)) +
     labs(y = 'Odds Ratio')+
@@ -131,7 +157,10 @@ for(i in c(1:length(nam))){
         breaks = tab$order,
         labels = tab$ID,
         expand = c(0,0),
-        limits = c(0.5,nrow(tab)/2+.5)
+        limits = c(0.5,nrow(tab)/2+.5),
+        sec.axis = sec_axis(~.,
+          breaks = tab$order,
+          labels = tab$symbol)
       ) +
       scale_y_log10(breaks = c(0.5,0.75,1,1.25,1.75), limits = c(0.45, 1.85), expand = c(0,0)) +
       coord_flip()
@@ -186,17 +215,17 @@ aux <- ggplot() + theme_void() + ylim(-9,45) + xlim(-1.2,1) +
                     ymin = 40.5, ymax = 46.75,
                     xmin = -.7, xmax = 1) +
   annotation_custom(ggplotGrob(plots[[1]]), # One dose
-                    ymin = 26.9, ymax = 45.5,
-                    xmin = -.75,xmax = +1) +
+                    ymin = 40, ymax = 45.52,
+                    xmin = -.735,xmax = 1.0775) +
   annotation_custom(ggplotGrob(plots[[2]]), # Two doses
-                    ymin = 16.15, ymax = 27.5,
-                    xmin = -.7325,xmax = +1) +
+                    ymin = 35.2, ymax = 40.7,
+                    xmin = -.735,xmax = 0.93) +
   annotation_custom(ggplotGrob(plots[[3]]), # Breakthrough susceptibility
-                    ymin = -8.6, ymax = 16.75,
-                    xmin = -.75, xmax = 1) +
+                    ymin = 15.1, ymax = 35.8,
+                    xmin = -.75, xmax = 1.085) +
   annotation_custom(ggplotGrob(plots[[4]]), # Breakthrough severity
-                    ymin = -11.5, ymax = -8,
-                    xmin = -.695, xmax = 1)
+                    ymin = 12.2, ymax = 15.7,
+                    xmin = -.7075, xmax = 0.865)
 
-ggsave(paste0(dir_results,'Figures/Validation.png'), plot = aux, width = 25, height = 55, dpi = 600, units = 'cm')
+ggsave(paste0(dir_results,'Figures/Validation.png'), plot = aux, width = 30, height = 55, dpi = 600, units = 'cm')
 
